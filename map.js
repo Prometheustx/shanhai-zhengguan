@@ -188,14 +188,13 @@
     }
     for(const e of s.enemies) {
       const m=Rules.enemies[e.type], r=m.radius;
-      if(m.devour) ring(c,e.x,e.y,r+4,'#ed9b74',1.6);
       ellipse(c,e.x,e.y+4,r+3,r*.7,'#142b23ae');
+      c.save();
+      c.globalAlpha=Math.max(.17,Math.min(1,e.hp/e.maxHp));
+      if(m.devour) ring(c,e.x,e.y,r+4,'#ed9b74',1.6);
       ellipse(c,e.x,e.y,r,r,m.color);ring(c,e.x,e.y,r,'#2c392e',1.5);
       text(c,m.glyph,e.x,e.y+r*.35,'#2a3229',Math.round(r*1.28));
-      if(e.hp<e.maxHp) {
-        c.fillStyle='#172520';c.fillRect(e.x-r,e.y-r-5,2*r,3);
-        c.fillStyle=m.color;c.fillRect(e.x-r,e.y-r-5,2*r*e.hp/e.maxHp,3);
-      }
+      c.restore();
       poly(c,[[e.x-3,e.y+r+4],[e.x+3,e.y+r+4],[e.x,e.y+r+8]],colors[e.gate]);
     }
     drawGuardians(c,s);

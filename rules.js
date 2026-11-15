@@ -13,7 +13,8 @@
     [p,mirror(p)].map(([x,y],side) => ({ id:i*2+side, x,y, side, label:(side ? '右' : '左') + (i+1) })));
   const config = {
     board:{W,H,upper,lower,paths,slots,gates:[lower.at(-1),mirror(lower.at(-1))],mirror,demonBoundary},
-    gold:90, waveGold:19, hp:12, maxLevel:3, relicWave:3, relicCost:34, defaultHero:'jingwei',
+    gold:20, waveGold:19, hp:12, maxLevel:3, relicWave:3, relicCost:34, defaultHero:'jingwei',
+    firstPreparation:20, waveBreak:8, npcInterval:1.1,
     shop:{size:4,refreshBase:8,refreshStep:4},
     levels:[null,{damage:1,range:0},{damage:1.72,range:10},{damage:2.9,range:22}],
     towers:{

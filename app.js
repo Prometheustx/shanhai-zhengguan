@@ -4,7 +4,7 @@
   const board=$('board'), c=$('map').getContext('2d'), dialog=$('dialog'), body=$('dialogBody');
   const mark=$('dragMark');
   const names=['左关','右关'];
-  let game=new Engine.Game(), s=game.state, side=0, session=null, online=[false,false], restart=[false,false];
+  let game=new Engine.Game(undefined,{npc:true}), s=game.state, side=0, session=null, online=[false,false], restart=[false,false];
   let picked=null, from=null, hover=null, targeting=null, drag=null, lastUI='', lastSlots='', last=performance.now(), acc=0;
   const slotButtons=R.board.slots.map(slot=>{
     const btn=document.createElement('button');
@@ -78,7 +78,7 @@
   };
   function msg(message,error=false){$('msg').textContent=message;$('msg').classList.toggle('error',error);}
   function setSide(i){
-    if(session||side===i) return;
+    if(!session||side===i) return;
     clearDrag();
     side=i;from=null;targeting=null;msg('当前由'+names[i]+'玩家操作。');
   }
@@ -89,10 +89,10 @@
   }
   $('closeDialog').onclick=()=>dialog.close();
   $('help').onclick=()=>show('回龙谷 · 对战规则',
-    '<ol><li>北面的魔界裂隙涌出妖潮，裂隙外是前沿哨位。左右各有一位守关人，例如精卫。入场前选定，进入战场后锁定。</li><li>商店随机出现四件单位，可免费拖到空阵台。每次刷新消耗灵气，费用逐次增加。</li><li>妖物出生时锁定最终关口，击杀所得灵气归最后一击的塔主。同种同级塔可以合成并夺取对方塔。</li><li>双方就绪迎战。守关人可主动施技，第二波后开放灵兽和神器。六波后关耐多的一方胜出，关耐相同比击杀灵气。</li></ol><p>本地模式点击左右切换玩家。联机房间里各自操作自己的席位。</p>');
+    '<ol><li>北面的魔界裂隙涌出妖潮，裂隙外是前沿哨位。双方守关人在入场前确定，本地对局的右关由 NPC 操控。</li><li>商店单位免费取用，拖到空阵台召唤，或拖到同种一级塔上合成并夺取。刷新消耗灵气。</li><li>妖物出生时锁定最终关口，击杀灵气归最后一击的塔主。妖物越透明，剩余生命越少。</li><li>首波可点就绪提前开战，也会在 20 秒后自动开始。后续各波自动开始。</li></ol>');
   function reset(){
     clearDrag();
-    game=new Engine.Game();s=game.state;side=0;picked=null;from=null;targeting=null;lastUI='';lastSlots='';
+    game=new Engine.Game(undefined,{npc:true});s=game.state;side=0;picked=null;from=null;targeting=null;lastUI='';lastSlots='';
     msg('拖动单位，修饰空阵台。');
   }
   $('restart').onclick=()=>{
@@ -163,7 +163,7 @@
     if(session!==current) return false;
     if(!result.ok){msg(result.error,true);return false;}
     if(action.kind==='merge') msg(names[actor]+(result.stolen?'夺下一座阵位，合成塔今后为该方获取灵气。':'完成合成，单位已升阶。'));
-    if(action.kind==='place') {picked=null;msg(names[actor]+'已召唤'+R.towers[result.type].name+'。');}
+    if(action.kind==='place') {picked=null;msg(result.merged?(result.stolen?'夺取并升为二级。':'合成升为二级。'):names[actor]+'已召唤'+R.towers[result.type].name+'。');}
     if(action.kind==='refreshShop') msg('商店已刷新。');
     if(action.kind==='hero') msg(names[actor]+'由'+R.heroes[action.hero].name+'守关。');
     if(action.kind==='skill') msg(names[actor]+'施放守关技。');
@@ -189,6 +189,10 @@
     if(from!=null){
       const f=from;from=null;
       command({kind:'merge',from:f,to:i});return;
+    }
+    const shop=s.players[side].shop;
+    if(picked!=null && shop[picked] && t && t.type===shop[picked] && t.level===1) {
+      return command({kind:'place',card:picked,revision:s.players[side].shopRevision,to:i});
     }
     if(t?.owner===side){from=i;msg('选择同种同阶的目标塔，可夺取对手的阵位。');return;}
     if(t){msg('这是对手的塔。先选择自己同种同阶的塔，才能夺阵。',true);return;}
@@ -220,6 +224,7 @@
   }
   const canPlace=source=>s.phase!=='over' && s.phase!=='lobby' && (!session||online[side]) &&
     s.players[side].shopRevision===source.revision && s.players[side].shop[source.card]===source.type;
+  const canPlaceOn=(source,t)=>!t || (t.type===source.type && t.level===1);
   document.addEventListener('pointermove',e=>{
     if(!drag || e.pointerId!==drag.id) return;
     if(!drag.moved && Math.hypot(drag.x-e.clientX,drag.y-e.clientY)<6) return;
@@ -230,7 +235,7 @@
       if(drag.kind==='place') picked=drag.card;
       if(drag.kind==='place') {
         const available=canPlace(drag);
-        msg(available?'松手修饰亮起的阵台。':'货架已变化，请重新选择。',!available);
+        msg(available?'松手放置，或拖到同种一级塔上升级。':'货架已变化，请重新选择。',!available);
       }
       const unit=R.towers[drag.type];
       mark.hidden=false;mark.textContent=unit.glyph;mark.style.color=unit.color;
@@ -261,34 +266,41 @@
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!dialog.open){clearDrag();from=null;targeting=null;}});
   function renderUI(){
     const p=s.players[side], skillWait=Math.max(0,Math.ceil(p.cooldown-s.time)), hero=R.heroes[p.hero], relic=p.relic && R.relics[p.relic.kind];
-    const key=JSON.stringify([s.phase,s.wave,s.players.map(x=>[x.hp,x.gold,x.kills,x.bounty,x.steals,x.ready,x.hero,x.heroConfirmed,x.shop,x.shopRevision,x.refreshCount,x.relic,x.spirit]),side,skillWait,picked,targeting?.kind,from,s.result,session?.room,online,restart]);
+    const remaining=s.preparationLeft==null?null:Math.ceil(s.preparationLeft);
+    const key=JSON.stringify([s.phase,s.wave,remaining,s.players.map(x=>[x.hp,x.gold,x.kills,x.bounty,x.steals,x.ready,x.hero,x.heroConfirmed,x.shop,x.shopRevision,x.refreshCount,x.relic,x.spirit]),side,skillWait,picked,targeting?.kind,from,s.result,session?.room,online,restart]);
     if(key!==lastUI){
       lastUI=key;
       $('lobby').hidden=s.phase!=='lobby';
+      $('lobbyPlayer1').hidden=!session;
+      document.querySelector('.lobby-players').classList.toggle('solo',!session);
       for(const i of [0,1]){
-        const x=s.players[i],select=$('hero'+i),panel=$('lobbyPlayer'+i),allowed=!session||(side===i&&online[i]);
+        const x=s.players[i],select=$('hero'+i),panel=$('lobbyPlayer'+i),allowed=session?(side===i&&online[i]):i===0;
         select.value=x.hero;select.disabled=x.heroConfirmed||!allowed;
         panel.querySelector('.hero-description').textContent=R.heroes[x.hero].desc;
         const confirm=panel.querySelector('.confirm-hero');
         confirm.disabled=x.heroConfirmed||!allowed;
-        confirm.textContent=x.heroConfirmed?'已确认':session&&side!==i?'等待对方选择':'确认守关人';
+        confirm.textContent=!session&&i===1?'NPC 自动选择':x.heroConfirmed?'已确认':session&&side!==i?'等待对方选择':'确认守关人';
       }
-      $('lobbyStatus').textContent=session?('房间 '+session.room+' · '+(!online.every(Boolean)?'等待另一位玩家连接':'各自确认守关人后进入')):'同屏双人 · 两位玩家分别确认';
+      $('lobbyNote').textContent=session?'双方各选一位守关人，确认后进入战场。':'选择你的守关人，右关由 NPC 自动应战。';
+      $('lobbyStatus').textContent=session?('房间 '+session.room+' · '+(!online.every(Boolean)?'等待另一位玩家连接':'各自确认守关人后进入')):'单人对战 · 右关为 NPC';
       const wave=R.waves[Math.max(0,s.phase==='prepare'?s.wave:s.wave-1)];
       $('waveNum').textContent='第 '+(s.phase==='prepare'?s.wave+1:s.wave)+' / '+R.waves.length+' 波';
       $('waveName').textContent=wave.name;
-      $('waveHint').textContent=s.phase==='over'?'本局结束':session&&!online.every(Boolean)?(s.phase==='battle'?'暂停 · 等待重连':'等待另一席位'):s.phase==='battle'?'妖潮来袭':'布阵阶段';
-      $('mode').textContent=session?'房间 '+session.room:'本地双人';
+      $('waveHint').textContent=s.phase==='over'?'本局结束':session&&!online.every(Boolean)?(s.phase==='battle'?'暂停 · 等待重连':'等待另一席位'):s.phase==='battle'?'妖潮来袭':s.phase==='prepare'?remaining+' 秒后开战':'选择守关人';
+      $('mode').textContent=session?'房间 '+session.room:'单人 · NPC';
       $('restart').textContent=session && restart[side]?'已同意重开':'重开';
       for(const [i,x] of s.players.entries()){
         const el=$('player'+i), h=R.heroes[x.hero], ready=el.querySelector('.ready');
+        el.querySelector('.identity strong').textContent=names[i]+(i===1&&!session?' · NPC':' · '+(i+1)+'P');
         el.querySelector('.crest').textContent=h.glyph;el.querySelector('small').textContent=h.name+' · '+x.kills+' 击杀 · '+x.bounty+' 击杀灵气';
         el.querySelector('.wealth b').textContent=x.gold;el.querySelector('.hp-num').textContent=x.hp+'/'+R.hp;
         el.querySelector('.meter i').style.width=100*x.hp/R.hp+'%';
-        ready.disabled=s.phase!=='prepare'||(session&&(side!==i||!online[side]));
+        ready.hidden=(!session&&i===1)||s.wave>0;
+        ready.disabled=s.phase!=='prepare'||s.wave!==0||(session&&(side!==i||!online[side]));
         ready.textContent=s.phase==='battle'?'迎战中':s.phase==='over'?'已结算':x.ready?'已就绪':'就绪';
         ready.setAttribute('aria-label',names[i]+ready.textContent);ready.setAttribute('aria-pressed',x.ready);
-        $('side'+i).setAttribute('aria-pressed',side===i);$('side'+i).disabled=!!session;
+        $('side'+i).setAttribute('aria-pressed',side===i);$('side'+i).disabled=true;
+        $('side'+i).hidden=!session;
       }
       $('activeSide').textContent=names[side]+' · '+(side+1)+'P';
       $('selectedTitle').textContent=targeting?.kind==='spirit'?'选择灵兽阵区':targeting?.kind==='relic'?'选择佩戴单位':targeting?.kind==='skill'?'选择施法位置':from!=null?'选择合成目标':'灵台商店';
@@ -298,7 +310,7 @@
         btn.setAttribute('aria-pressed',i===picked&&from==null&&!targeting&&!!t);
         btn.title=t?.desc||'已取用';
         if(t) btn.style.setProperty('--glyph',t.color);
-        btn.innerHTML=t?'<span class="glyph">'+t.glyph+'</span><span><strong>'+t.name+'</strong><small>'+t.role+'</small></span><b>免费</b>':'<span class="empty-card">已取用</span>';
+        btn.innerHTML=t?'<span class="item-art item-'+type+'" aria-hidden="true"></span><span><strong>'+t.name+'</strong><small>'+t.role+'</small></span><b>免费</b>':'<span class="empty-card">已取用</span>';
       });
       const cost=R.shop.refreshBase+p.refreshCount*R.shop.refreshStep;
       $('refresh').textContent='换一批 · '+cost+' 灵气';
@@ -328,8 +340,8 @@
         const label=pos.label+(t?' · '+names[t.owner]+' '+R.towers[t.type].name+' '+t.level+'级'+(r?' · '+r.name:''):' · 空阵台');
         btn.style.setProperty('--side',t?BoardArt.colors[t.owner]:'#b5aa82');btn.setAttribute('aria-label',label);btn.title=label;
         btn.classList.toggle('occupied',!!t);btn.classList.toggle('on',i===from);btn.classList.toggle('drop',from!=null&&!!validMerge(from,i));
-        btn.classList.toggle('place-target',!!placement&&!t);
-        btn.classList.toggle('place-hover',!!placement&&!t&&i===dropSlot);
+        btn.classList.toggle('place-target',!!placement&&canPlaceOn(drag,t));
+        btn.classList.toggle('place-hover',!!placement&&canPlaceOn(drag,t)&&i===dropSlot);
         btn.style.setProperty('--glyph',t?R.towers[t.type].color:'');
         btn.innerHTML=t?'<span class="glyph">'+R.towers[t.type].glyph+'</span><span class="rank" aria-hidden="true">'+
           '<i></i>'.repeat(t.level)+'</span>'+(r?'<span class="rune">'+r.glyph+'</span>':''):'';

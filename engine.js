@@ -22,9 +22,15 @@
   const player=()=>({gold:R.gold,hp:R.hp,kills:0,bounty:0,steals:0,hero:R.defaultHero,heroConfirmed:false,shop:[],shopRevision:0,refreshCount:0,cooldown:0,
     buff:0,shield:0,shieldUntil:0,relic:null,spirit:null,spiritUsed:false,ready:false});
   class Game {
-    constructor(openingSide=Math.random()<.5?0:1) {
+    constructor(openingSide=Math.random()<.5?0:1,options={}) {
       this.state={phase:'lobby',wave:0,time:0,players:[player(),player()],
-        towers:R.board.slots.map(()=>null),enemies:[],effects:[],result:null};
+        towers:R.board.slots.map(()=>null),enemies:[],effects:[],result:null,preparationLeft:null};
+      this.npc=!!options.npc;
+      this.npcWait=0;
+      if(this.npc) {
+        this.state.players[1].hero='houyi';
+        this.state.players[1].heroConfirmed=true;
+      }
       this.queue=[]; this.spawnIn=0; this.seq=0; this.step=openingSide;this.openingSide=openingSide;
       const opening=this.rollShop();
       for(const p of this.state.players) p.shop=opening.slice();
@@ -33,9 +39,10 @@
       const types=Object.keys(R.towers);
       return Array.from({length:R.shop.size},()=>types[Math.floor(Math.random()*types.length)]);
     }
-    command(side,action) {
+    command(side,action,fromNpc=false) {
       const s=this.state;
       if ((side!==0 && side!==1) || !action || typeof action!=='object') return fail('无效操作。');
+      if (this.npc && side===1 && !fromNpc) return fail('右关由 NPC 操控。');
       if (s.phase==='over') return fail('本局已结束。');
       const p=s.players[side], a=action, slot=i=>Number.isInteger(i) ? R.board.slots[i] : null;
       const ok={ok:true};
@@ -47,7 +54,9 @@
       if (a.kind==='confirmHero') {
         if (s.phase!=='lobby' || p.heroConfirmed) return fail('守关人已确定。');
         p.heroConfirmed=true;
-        if(s.players.every(x=>x.heroConfirmed)) s.phase='prepare';
+        if(s.players.every(x=>x.heroConfirmed)) {
+          s.phase='prepare';s.preparationLeft=R.firstPreparation;
+        }
         return ok;
       }
       if(s.phase==='lobby') return fail('双方先确定守关人。');
@@ -58,18 +67,31 @@
         return ok;
       }
       if (a.kind==='ready') {
-        if (s.phase!=='prepare') return fail('妖潮已经开始。');
+        if (s.phase!=='prepare' || s.wave!==0) return fail('只有首波可以提前就绪。');
         p.ready=!p.ready;
-        if (s.players.every(x=>x.ready)) this.start();
+        if ((this.npc && s.players[0].ready) || s.players.every(x=>x.ready)) this.start();
         return ok;
       }
       if (a.kind==='place') {
         const pos=slot(a.to);
         if (!pos) return fail('请选择地图上的空阵位。');
-        if (s.towers[a.to]) return fail('阵位已占用。请先召唤到空位，再拖动合成。');
         if (!Number.isInteger(a.card) || a.card<0 || a.card>=R.shop.size ||
             a.revision!==p.shopRevision || !p.shop[a.card]) return fail('货架已变化，请重新选择。');
         const type=p.shop[a.card];
+        const target=s.towers[a.to];
+        if(target) {
+          if(target.type!==type || target.level!==1) return fail('商店单位只能合成同种一级单位。');
+          const stolen=target.owner!==side;
+          if(stolen) {
+            p.steals++;
+            const other=s.players[target.owner];
+            if(other.relic?.slot===a.to) other.relic.slot=null;
+          }
+          target.level=2;target.owner=side;target.shots=0;target.spiritShots=0;
+          p.shop[a.card]=null;
+          this.effect('merge',pos,{side,text:stolen?'夺阵 · 贰':'升阶 · 贰'});
+          return {ok:true,type,merged:true,stolen};
+        }
         p.shop[a.card]=null;
         s.towers[a.to]={type,level:1,owner:side,cd:0,shots:0,spiritShots:0};
         this.effect('summon',pos,{side});
@@ -166,7 +188,7 @@
     }
     start() {
       const s=this.state;
-      s.wave++;s.phase='battle';
+      s.wave++;s.phase='battle';s.preparationLeft=null;
       for(const p of s.players) {p.ready=false;p.spiritUsed=false;}
       const wave=R.waves[s.wave-1];
       this.queue=wave.groups.flatMap(([type,n],group)=>{
@@ -202,7 +224,16 @@
       const s=this.state;
       s.time+=dt;
       s.effects=s.effects.filter(f=>s.time-f.at<f.duration);
-      if (s.phase!=='battle') return;
+      if(s.phase==='lobby' || s.phase==='over') return;
+      if(this.npc) {
+        this.npcWait-=dt;
+        if(this.npcWait<=0) {this.npcWait=R.npcInterval;this.playNpc();}
+      }
+      if(s.phase==='prepare') {
+        s.preparationLeft=Math.max(0,s.preparationLeft-dt);
+        if(s.preparationLeft<=0) this.start();
+        return;
+      }
       this.spawnIn-=dt;
       if (this.queue.length && this.spawnIn<=0) {
         this.spawn(this.queue.shift());this.spawnIn+=R.waves[s.wave-1].gap;
@@ -278,8 +309,51 @@
             p.gold+=R.waveGold+(spirit?.gold||0);
             p.hp=Math.min(R.hp,p.hp+(spirit?.heal||0));
           }
-          s.phase='prepare';
+          s.phase='prepare';s.preparationLeft=R.waveBreak;
         }
+      }
+    }
+    playNpc() {
+      const s=this.state,p=s.players[1];
+      if(s.phase!=='prepare' && s.phase!=='battle') return;
+      if(s.phase==='prepare' && s.wave>=2 && !p.spirit) {
+        this.command(1,{kind:'spirit',spirit:'xuanwu'},true);
+        return;
+      }
+      if(s.phase==='battle' && p.cooldown<=s.time) {
+        const target=s.enemies.filter(e=>e.hp>0 && R.enemies[e.type].elite)
+          .sort((a,b)=>b.maxHp-a.maxHp)[0];
+        if(target) {
+          this.command(1,{kind:'skill',x:target.x,y:target.y},true);
+          return;
+        }
+      }
+      const candidates=p.shop.map((type,card)=>({type,card})).filter(c=>c.type);
+      const steal=candidates.flatMap(c=>s.towers.map((t,to)=>({c,t,to})))
+        .find(x=>x.t && x.t.owner===0 && x.t.level===1 && x.t.type===x.c.type);
+      if(steal) {
+        this.command(1,{kind:'place',card:steal.c.card,revision:p.shopRevision,to:steal.to},true);
+        return;
+      }
+      const owned=s.towers.map((t,i)=>({t,i})).filter(x=>x.t?.owner===1);
+      for(const from of owned) {
+        const target=owned.find(x=>x.i!==from.i && x.t.level===from.t.level &&
+          x.t.type===from.t.type && x.t.level<R.maxLevel);
+        if(target && owned.length>=6) {
+          this.command(1,{kind:'merge',from:from.i,to:target.i},true);return;
+        }
+      }
+      if(candidates.length) {
+        const positions=R.board.slots.filter(pos=>!s.towers[pos.id]);
+        positions.sort((a,b)=>{
+          const score=pos=>Math.min(...routes.flatMap(branch=>branch.map(route=>
+            Math.min(...route.pieces.map(piece=>Math.hypot(pos.x-piece.x,pos.y-piece.y))))))
+            +(pos.side===1?0:22)+(pos.y<300?-12:0);
+          return score(a)-score(b);
+        });
+        if(positions.length) this.command(1,{kind:'place',card:candidates[0].card,revision:p.shopRevision,to:positions[0].id},true);
+      } else if(p.gold>=R.shop.refreshBase+p.refreshCount*R.shop.refreshStep) {
+        this.command(1,{kind:'refreshShop'},true);
       }
     }
     leak(e,damage) {

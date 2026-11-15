@@ -67,6 +67,8 @@ main .slot.place-target:not(.occupied){
 main .slot.place-hover:not(.occupied){
   outline:2px solid #fff5c2;background:#ffed9847;
 }
+main .slot.occupied.place-target{outline:1.5px dashed #ffe9a5;outline-offset:2px;box-shadow:0 0 10px #f9db8488}
+main .slot.occupied.place-hover{outline:2px solid #fff5c2;box-shadow:0 0 14px #fff2ad}
 main .slot .rank{
   display:flex;gap:2px;padding:0;line-height:1;border:0;border-radius:0;background:none;
 }
@@ -93,11 +95,13 @@ dialog{width:min(500px,calc(100% - 28px));padding:21px;background:#1c2e28;color:
 .lobby-heading h2{font:700 28px var(--serif);margin:4px 0}.lobby-kicker{font-size:11px;letter-spacing:.18em;color:#ccb287}
 .lobby-note,.lobby-status{font-size:12px;color:#bdcbb9;margin:8px 0}
 .lobby-players{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lobby-players.solo{grid-template-columns:1fr}
 .lobby-player{display:grid;gap:8px;padding:14px;background:#243b30;border:1px solid #567563;border-radius:5px}
 .lobby-player:nth-child(2){border-color:#927558;background:#382f27}
 .lobby-player label{font:700 18px var(--serif);color:#d5e9ce}.lobby-player select{width:100%}
 .hero-description{margin:0;color:#c7d2c1;font-size:12px;min-height:35px}
 .lobby-player button{background:#445c48;border-color:#92a783}.lobby-player button:disabled{opacity:.65}
+body .lobby-player:nth-child(2) select{opacity:.72}
 dialog{z-index:30}
 .commands{background:linear-gradient(150deg,#293b31,#172721);border-color:#8d7651;box-shadow:inset 0 0 0 2px #15251e,inset 0 0 0 3px #806d4b80}
 .commands-head strong{color:#f5dfb4}.shop-caption{display:flex;justify-content:space-between;align-items:center;gap:4px;margin-top:8px;color:#c6b692;font-size:11px}
@@ -109,6 +113,25 @@ dialog{z-index:30}
 .card b{align-self:start;font-size:10px;color:#e8cd8b;font-weight:400}
 .card[aria-pressed=true]{border-color:#f1d899;box-shadow:inset 0 0 0 1px #e5ca8b,0 0 9px #eacb6666}
 .card:disabled{opacity:.66;background:#26352d;border-style:dashed}.empty-card{grid-column:1/-1;text-align:center;color:#87998b;font-size:11px}
+body{background:#101d1a}
+.commands{position:relative;background:linear-gradient(145deg,#253d33,#102820 64%,#142c26);border:1px solid #ae915d;box-shadow:inset 0 0 0 2px #13231d,inset 0 0 0 3px #ac905766,0 3px 12px #0008}
+.commands:before,.commands:after{content:"";position:absolute;width:15px;height:15px;pointer-events:none;border-color:#d1b57c;border-style:double}
+.commands:before{left:2px;top:2px;border-width:2px 0 0 2px}.commands:after{right:2px;bottom:2px;border-width:0 2px 2px 0}
+.shop-caption{color:#d7c49d;border-bottom:1px solid #ad90565c;padding-bottom:5px}
+.card{background:linear-gradient(145deg,#e2d6b6,#b8b28f);border:1px solid #be9b61;box-shadow:inset 0 0 0 2px #e9dfbe90,0 2px 3px #08130d99;color:#24372e}
+.card:hover:not(:disabled){background:linear-gradient(145deg,#f3e8ca,#c2c3a0);border-color:#f3d998}
+.card strong{color:#26382d}.card small{color:#65705b}.card b{color:#7c492b}
+.card .glyph{background:#304c3e;border:1px solid #988258;color:var(--glyph);box-shadow:inset 0 0 0 2px #1c332c}
+.card[aria-pressed=true]{background:linear-gradient(145deg,#f6eaca,#d1caa4)}
+.card:disabled{background:#24372e;border-color:#5b6953}.empty-card{color:#a0ad95}
+.card .item-art{display:block;width:44px;height:44px;background-image:url('assets/shop-items.webp');background-repeat:no-repeat;background-size:300% 100%;filter:drop-shadow(0 2px 2px #25352377)}
+.card .item-sword{background-position:0 50%}.card .item-thunder{background-position:50% 50%}.card .item-frost{background-position:100% 50%}
+@media (orientation:landscape) and (max-height:620px){main .card .item-art{width:33px;height:35px}}
+.player{background:linear-gradient(110deg,#162f29,#20352b);border-color:#8d7652}
+.crest{border-radius:50%;box-shadow:inset 0 0 0 2px #18291e,0 0 0 1px #d4b579}
+.wave{background:linear-gradient(130deg,#1b302a,#344331);border-color:#a48a5e}
+#refresh,.command-foot button{border-color:#a78d62;background:linear-gradient(#4c5941,#283b30);color:#f4e6bc}
+.battlefield{border-color:#887a59}
 @media (orientation:landscape) and (max-height:620px){
  .lobby-panel{padding:10px 15px}.lobby-heading h2{font-size:20px}.lobby-note,.lobby-status{margin:3px 0;font-size:10px}
  .lobby-players{gap:7px}.lobby-player{gap:4px;padding:7px}.lobby-player label{font-size:14px}
