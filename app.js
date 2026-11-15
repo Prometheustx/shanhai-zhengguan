@@ -5,7 +5,7 @@
   const mark=$('dragMark');
   const names=['左关','右关'];
   let game=new Engine.Game(), s=game.state, side=0, session=null, online=[false,false], restart=[false,false];
-  let picked='sword', from=null, hover=null, targeting=null, drag=null, lastUI='', lastSlots='', last=performance.now(), acc=0;
+  let picked=null, from=null, hover=null, targeting=null, drag=null, lastUI='', lastSlots='', last=performance.now(), acc=0;
   const slotButtons=R.board.slots.map(slot=>{
     const btn=document.createElement('button');
     btn.type='button';btn.className='slot';btn.dataset.slot=slot.id;
@@ -25,17 +25,21 @@
     $('player'+i).querySelector('.ready').onclick=()=>command({kind:'ready'},i);
     $('side'+i).onclick=()=>setSide(i);
   }
-  const cards=Object.entries(R.towers).map(([type,t])=>{
+  const cards=Array.from({length:R.shop.size},(_,card)=>{
     const b=document.createElement('button');
-    b.type='button';b.className='card';b.style.setProperty('--glyph',t.color);b.title=t.desc;
-    b.innerHTML='<span class="glyph">'+t.glyph+'</span><span><strong>'+t.name+'</strong><small>'+t.role+'</small></span><b>'+t.cost+' 灵气</b>';
-    b.onclick=()=>{from=null;picked=type;targeting=null;msg('把'+t.name+'拖到空阵台，或点选空阵台。');};
-    b.onpointerdown=e=>beginDrag(e,{kind:'place',type});
+    b.type='button';b.className='card';
+    b.onclick=()=>{const type=s.players[side].shop[card];if(!type)return;from=null;picked=card;targeting=null;msg('把'+R.towers[type].name+'拖到空阵台，或点选空阵台。');};
+    b.onpointerdown=e=>{const p=s.players[side],type=p.shop[card];if(type)beginDrag(e,{kind:'place',type,card,revision:p.shopRevision});};
     $('cards').append(b);
-    return [type,b];
+    return b;
   });
-  for(const [id,h] of Object.entries(R.heroes)) $('heroSelect').add(new Option(h.name+' · '+h.skill,id));
-  $('heroSelect').onchange=e=>command({kind:'hero',hero:e.target.value});
+  for(const i of [0,1]){
+    for(const [id,h] of Object.entries(R.heroes)) $('hero'+i).add(new Option(h.name+' · '+h.skill,id));
+    $('hero'+i).onchange=e=>command({kind:'hero',hero:e.target.value},i);
+    $('lobbyPlayer'+i).querySelector('.confirm-hero').onclick=()=>command({kind:'confirmHero'},i);
+  }
+  $('lobbyRoom').onclick=()=>$('room').click();
+  $('refresh').onclick=()=>{clearDrag();picked=null;command({kind:'refreshShop'});};
   $('skill').onclick=()=>{
     const p=s.players[side], h=R.heroes[p.hero];
     if(!h.radius) return command({kind:'skill'});
@@ -85,10 +89,10 @@
   }
   $('closeDialog').onclick=()=>dialog.close();
   $('help').onclick=()=>show('回龙谷 · 对战规则',
-    '<ol><li>选一名守关人，把单位卡拖到亮起的空阵台，或先点卡再点阵台。全图阵台由双方共享。</li><li>妖物出生时锁定最终关口。塔攻击射程内最接近终点的妖物，击杀所得灵气归打出最后一击的塔主。</li><li>把自己的塔拖到同种同级塔上，或先后点选两座塔。目标升一级并归发起者。塔下方的点表示等级，最多三级。</li><li>双方就绪进入下一波。第二波后可以选灵兽和神器，守关人也可以主动施放技能。</li><li>一方先破关即败。六波后先比关耐，再比击杀灵气。胜者执掌封印。</li></ol><p>本地模式点击左右切换操作人。联机房间里各自操作自己的席位。</p>');
+    '<ol><li>北面的魔界裂隙涌出妖潮，裂隙外是前沿哨位。左右各有一位守关人，例如精卫。入场前选定，进入战场后锁定。</li><li>商店随机出现四件单位，可免费拖到空阵台。每次刷新消耗灵气，费用逐次增加。</li><li>妖物出生时锁定最终关口，击杀所得灵气归最后一击的塔主。同种同级塔可以合成并夺取对方塔。</li><li>双方就绪迎战。守关人可主动施技，第二波后开放灵兽和神器。六波后关耐多的一方胜出，关耐相同比击杀灵气。</li></ol><p>本地模式点击左右切换玩家。联机房间里各自操作自己的席位。</p>');
   function reset(){
     clearDrag();
-    game=new Engine.Game();s=game.state;side=0;picked='sword';from=null;targeting=null;lastUI='';lastSlots='';
+    game=new Engine.Game();s=game.state;side=0;picked=null;from=null;targeting=null;lastUI='';lastSlots='';
     msg('拖动单位，修饰空阵台。');
   }
   $('restart').onclick=()=>{
@@ -115,7 +119,7 @@
     source.onmessage=e=>{
       if(session?.source!==source) return;
       const data=JSON.parse(e.data);
-      if(data.state.wave<s.wave){from=null;targeting=null;picked='sword';}
+      if(data.state.wave<s.wave){from=null;targeting=null;picked=null;}
       s=data.state;online=data.online;restart=data.restart;
     };
     source.onerror=()=>{
@@ -159,7 +163,8 @@
     if(session!==current) return false;
     if(!result.ok){msg(result.error,true);return false;}
     if(action.kind==='merge') msg(names[actor]+(result.stolen?'夺下一座阵位，合成塔今后为该方获取灵气。':'完成合成，单位已升阶。'));
-    if(action.kind==='place') msg(names[actor]+'已召唤'+R.towers[action.type].name+'。');
+    if(action.kind==='place') {picked=null;msg(names[actor]+'已召唤'+R.towers[result.type].name+'。');}
+    if(action.kind==='refreshShop') msg('商店已刷新。');
     if(action.kind==='hero') msg(names[actor]+'由'+R.heroes[action.hero].name+'守关。');
     if(action.kind==='skill') msg(names[actor]+'施放守关技。');
     if(action.kind==='relic') msg(names[actor]+'已装备'+R.relics[action.relic].name+'。');
@@ -187,7 +192,9 @@
     }
     if(t?.owner===side){from=i;msg('选择同种同阶的目标塔，可夺取对手的阵位。');return;}
     if(t){msg('这是对手的塔。先选择自己同种同阶的塔，才能夺阵。',true);return;}
-    command({kind:'place',type:picked,to:i});
+    const p=s.players[side];
+    if(picked==null || !p.shop[picked]) return msg('请先选择商店中的单位。',true);
+    command({kind:'place',card:picked,revision:p.shopRevision,to:i});
   }
   function position(e){
     const bounds=board.getBoundingClientRect();
@@ -211,7 +218,8 @@
     const button=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-slot]');
     return button?Number(button.dataset.slot):null;
   }
-  const canPlace=type=>s.phase!=='over' && (!session||online[side]) && s.players[side].gold>=R.towers[type].cost;
+  const canPlace=source=>s.phase!=='over' && s.phase!=='lobby' && (!session||online[side]) &&
+    s.players[side].shopRevision===source.revision && s.players[side].shop[source.card]===source.type;
   document.addEventListener('pointermove',e=>{
     if(!drag || e.pointerId!==drag.id) return;
     if(!drag.moved && Math.hypot(drag.x-e.clientX,drag.y-e.clientY)<6) return;
@@ -219,10 +227,10 @@
       drag.moved=true;targeting=null;
       board.classList.remove('aim');
       from=drag.kind==='merge'?drag.slot:null;
-      picked=drag.type;
+      if(drag.kind==='place') picked=drag.card;
       if(drag.kind==='place') {
-        const affordable=canPlace(drag.type);
-        msg(affordable?'松手修饰亮起的阵台。':'当前无法修饰阵台，请检查灵气和连接。',!affordable);
+        const available=canPlace(drag);
+        msg(available?'松手修饰亮起的阵台。':'货架已变化，请重新选择。',!available);
       }
       const unit=R.towers[drag.type];
       mark.hidden=false;mark.textContent=unit.glyph;mark.style.color=unit.color;
@@ -247,15 +255,25 @@
     if(!d.moved || name!=='pointerup' || d.side!==side || d.session!==session) return;
     const to=slotAt(e);
     if(to==null) return msg(d.kind==='place'?'已取消修饰。':'拖到同种同阶的塔上才会合成。');
-    if(d.kind==='place') command({kind:'place',type:d.type,to},d.side);
+    if(d.kind==='place') command({kind:'place',card:d.card,revision:d.revision,to},d.side);
     else command({kind:'merge',from:d.slot,to},d.side);
   });
   document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!dialog.open){clearDrag();from=null;targeting=null;}});
   function renderUI(){
     const p=s.players[side], skillWait=Math.max(0,Math.ceil(p.cooldown-s.time)), hero=R.heroes[p.hero], relic=p.relic && R.relics[p.relic.kind];
-    const key=JSON.stringify([s.phase,s.wave,s.players.map(x=>[x.hp,x.gold,x.kills,x.bounty,x.steals,x.ready,x.hero,x.relic,x.spirit]),side,skillWait,picked,targeting?.kind,from,s.result,session?.room,online,restart]);
+    const key=JSON.stringify([s.phase,s.wave,s.players.map(x=>[x.hp,x.gold,x.kills,x.bounty,x.steals,x.ready,x.hero,x.heroConfirmed,x.shop,x.shopRevision,x.refreshCount,x.relic,x.spirit]),side,skillWait,picked,targeting?.kind,from,s.result,session?.room,online,restart]);
     if(key!==lastUI){
       lastUI=key;
+      $('lobby').hidden=s.phase!=='lobby';
+      for(const i of [0,1]){
+        const x=s.players[i],select=$('hero'+i),panel=$('lobbyPlayer'+i),allowed=!session||(side===i&&online[i]);
+        select.value=x.hero;select.disabled=x.heroConfirmed||!allowed;
+        panel.querySelector('.hero-description').textContent=R.heroes[x.hero].desc;
+        const confirm=panel.querySelector('.confirm-hero');
+        confirm.disabled=x.heroConfirmed||!allowed;
+        confirm.textContent=x.heroConfirmed?'已确认':session&&side!==i?'等待对方选择':'确认守关人';
+      }
+      $('lobbyStatus').textContent=session?('房间 '+session.room+' · '+(!online.every(Boolean)?'等待另一位玩家连接':'各自确认守关人后进入')):'同屏双人 · 两位玩家分别确认';
       const wave=R.waves[Math.max(0,s.phase==='prepare'?s.wave:s.wave-1)];
       $('waveNum').textContent='第 '+(s.phase==='prepare'?s.wave+1:s.wave)+' / '+R.waves.length+' 波';
       $('waveName').textContent=wave.name;
@@ -273,9 +291,18 @@
         $('side'+i).setAttribute('aria-pressed',side===i);$('side'+i).disabled=!!session;
       }
       $('activeSide').textContent=names[side]+' · '+(side+1)+'P';
-      $('selectedTitle').textContent=targeting?.kind==='spirit'?'选择灵兽阵区':targeting?.kind==='relic'?'选择佩戴单位':targeting?.kind==='skill'?'选择施法位置':from!=null?'选择合成目标':'修饰阵台';
-      for(const [type,btn] of cards) {btn.setAttribute('aria-pressed',type===picked&&from==null&&!targeting);btn.disabled=s.phase==='over';}
-      $('heroSelect').value=p.hero;$('heroSelect').disabled=s.wave!==0;$('heroSelect').title=hero.desc;
+      $('selectedTitle').textContent=targeting?.kind==='spirit'?'选择灵兽阵区':targeting?.kind==='relic'?'选择佩戴单位':targeting?.kind==='skill'?'选择施法位置':from!=null?'选择合成目标':'灵台商店';
+      cards.forEach((btn,i)=>{
+        const type=p.shop[i],t=R.towers[type];
+        btn.disabled=!t || s.phase==='over' || s.phase==='lobby';
+        btn.setAttribute('aria-pressed',i===picked&&from==null&&!targeting&&!!t);
+        btn.title=t?.desc||'已取用';
+        if(t) btn.style.setProperty('--glyph',t.color);
+        btn.innerHTML=t?'<span class="glyph">'+t.glyph+'</span><span><strong>'+t.name+'</strong><small>'+t.role+'</small></span><b>免费</b>':'<span class="empty-card">已取用</span>';
+      });
+      const cost=R.shop.refreshBase+p.refreshCount*R.shop.refreshStep;
+      $('refresh').textContent='换一批 · '+cost+' 灵气';
+      $('refresh').disabled=s.phase==='over'||s.phase==='lobby'||p.gold<cost||!!(session&&!online[side]);
       $('skill').textContent=hero.skill+(skillWait?' · '+skillWait+'秒':'');$('skill').title=hero.desc;
       $('skill').disabled=s.phase!=='battle'||skillWait>0;
       $('relic').disabled=!relicOpen()||s.phase==='over';
@@ -290,7 +317,7 @@
       board.classList.toggle('aim',targeting?.kind==='skill');
       board.classList.toggle('choosing-spirit',targeting?.kind==='spirit');
     }
-    const placement=drag?.moved&&drag.kind==='place'&&canPlace(drag.type);
+    const placement=drag?.moved&&drag.kind==='place'&&canPlace(drag);
     const dropSlot=drag?.moved?drag.over:null;
     const skey=JSON.stringify([s.towers.map(t=>t&&[t.owner,t.type,t.level]),s.players.map(p=>p.relic),from,side,placement,dropSlot]);
     if(skey!==lastSlots){
@@ -316,8 +343,8 @@
       while(acc>=1/60){game.tick(1/60);acc-=1/60;}
     }
     renderUI();
-    const pos=drag?.moved?drag.over:from??hover, t=s.towers[pos], canPreview=pos!=null&&!targeting;
-    BoardArt.draw(c,s,canPreview?{slot:pos,range:t?R.towers[t.type].range+R.levels[t.level].range:R.towers[picked].range}:null);
+    const pos=drag?.moved?drag.over:from??hover, t=s.towers[pos], chosen=R.towers[s.players[side].shop[picked]], canPreview=pos!=null&&!targeting&&(t||chosen);
+    BoardArt.draw(c,s,canPreview?{slot:pos,range:t?R.towers[t.type].range+R.levels[t.level].range:chosen.range}:null);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);

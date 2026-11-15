@@ -121,8 +121,6 @@
       ellipse(c,x-12,y+5,2.3,1.1,'#9b8d69');
       ellipse(c,x+13,y+4,2,1,'#827a5f');
     }
-    zone(c,'魔界裂隙',622,34,'#e8c5ff');
-    zone(c,'前沿哨位',392,92,'#ffe2b0');
     c.restore();
   }
   function drawPlatformEnergy(c,state){
@@ -160,10 +158,6 @@
         text(c,Rules.heroes[player.hero].glyph,0,-13,colors[side],12);
       }
       c.restore();
-      c.font='bold 12px "Microsoft YaHei", sans-serif';c.textAlign='center';
-      const label=Rules.heroes[player.hero].name;
-      c.lineWidth=3;c.strokeStyle='#232c21';c.strokeText(label,x,y+17);
-      c.fillStyle=colors[side];c.fillText(label,x,y+17);
     }
   }
   function draw(c,s,aim) {

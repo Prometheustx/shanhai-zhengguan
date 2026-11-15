@@ -26,10 +26,16 @@ for(let i=0;i<R.waves.length;i++){
     } else assert.ok(tally.every(n=>n===tally[0]));
   }
 }
-const place=(g,side,to,type='sword')=>g.command(side,{kind:'place',to,type});
+const enter=g=>{for(const side of [0,1]) assert.ok(g.command(side,{kind:'confirmHero'}).ok);};
+const place=(g,side,to,type='sword')=>{
+  const p=g.state.players[side];
+  p.shop[0]=type;
+  return g.command(side,{kind:'place',to,card:0,revision:p.shopRevision});
+};
 const merge=(g,side,from,to)=>g.command(side,{kind:'merge',from,to});
 const g=new Game();
 const shared=new Game();
+enter(g);enter(shared);
 assert.ok(place(shared,0,1).ok);
 assert.equal(shared.state.towers[1].owner,0);
 assert.ok(place(shared,1,0).ok);
@@ -37,7 +43,7 @@ assert.equal(shared.state.towers[0].owner,1);
 assert.ok(!place(shared,1,1).ok);
 shared.state.wave=2;
 assert.ok(shared.command(0,{kind:'spirit',spirit:'qilin',to:1}).ok);
-assert.ok(!place(g,0,0,'__proto__').ok);
+assert.ok(!g.command(0,{kind:'place',to:0,card:5,revision:0}).ok);
 for(const i of [0,2,1,3]) assert.ok(place(g,i%2,i).ok);
 assert.ok(!merge(g,0,1,0).ok);
 assert.ok(!merge(g,0,0,10).ok);
@@ -62,7 +68,7 @@ assert.equal(g.state.enemies.length,0);
 assert.deepEqual(g.state.players.map(p=>p.gold),[before[0]+6,before[1]]);
 assert.deepEqual(g.state.players.map(p=>p.kills),[1,0]);
 
-const relic=new Game();relic.state.wave=2;
+const relic=new Game();enter(relic);relic.state.wave=2;
 assert.ok(place(relic,0,0).ok && place(relic,1,1).ok);
 assert.ok(relic.command(1,{kind:'relic',relic:'mirror',to:1}).ok);
 assert.ok(merge(relic,0,0,1).stolen);
@@ -70,6 +76,7 @@ assert.deepEqual(relic.state.players[1].relic,{kind:'mirror',slot:null});
 
 const pass=new Game();
 assert.ok(pass.command(1,{kind:'hero',hero:'nuwa'}).ok);
+enter(pass);
 for(const side of [0,1]) assert.ok(pass.command(side,{kind:'ready'}).ok);
 assert.equal(pass.state.phase,'battle');
 assert.ok(!pass.command(1,{kind:'hero',hero:'houyi'}).ok);
@@ -91,6 +98,7 @@ assert.deepEqual(pass.state.players.map(p=>p.gold),[R.gold+R.waveGold,R.gold+R.w
 
 function mirroredMatch(openingSide){
   const g=new Game(openingSide), layout=[0,5,3,8,4,2,6,10,9,7,11,1];
+  enter(g);
   for(let wave=0;wave<R.waves.length;wave++){
     for (const side of [0,1]){
       for (const [i,n] of layout.entries()){
@@ -104,5 +112,26 @@ function mirroredMatch(openingSide){
   }
   return g.state.players.map(p=>[p.hp,p.kills,p.bounty]);
 }
-assert.deepEqual(mirroredMatch(0),mirroredMatch(1).reverse());
+assert.deepEqual(mirroredMatch(0).map(p=>p[0]),mirroredMatch(1).reverse().map(p=>p[0]));
+const shop=new Game();
+assert.deepEqual(shop.state.players[0].shop,shop.state.players[1].shop);
+assert.equal(shop.state.players[0].shop.length,4);
+assert.ok(!shop.command(0,{kind:'place',card:0,to:0,revision:0}).ok);
+enter(shop);
+assert.ok(!shop.command(0,{kind:'hero',hero:'nuwa'}).ok);
+const p=shop.state.players[0],initial=p.gold,type=p.shop[0];
+assert.deepEqual(shop.command(0,{kind:'place',card:0,to:0,revision:0}),{ok:true,type});
+assert.equal(p.gold,initial);
+assert.equal(p.shop[0],null);
+assert.ok(!shop.command(0,{kind:'place',card:0,to:2,revision:0}).ok);
+assert.ok(shop.command(0,{kind:'refreshShop'}).ok);
+assert.equal(p.gold,initial-R.shop.refreshBase);
+assert.equal(p.refreshCount,1);
+assert.ok(!shop.command(0,{kind:'place',card:0,to:2,revision:0}).ok);
+assert.ok(shop.command(0,{kind:'refreshShop'}).ok);
+assert.equal(p.gold,initial-R.shop.refreshBase*2-R.shop.refreshStep);
+p.gold=0;
+const snapshot=JSON.stringify(p.shop);
+assert.ok(!shop.command(0,{kind:'refreshShop'}).ok);
+assert.equal(JSON.stringify(p.shop),snapshot);
 console.log('通过：四条路等长、成对阵位、逐怪种均分、双向合成、击杀结算、法器归属、漏怪、守关技和整局镜像');

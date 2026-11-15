@@ -19,13 +19,19 @@
   const sq=(a,b)=>(a.x-b.x)**2+(a.y-b.y)**2;
   const fail=error=>({ok:false,error});
   const has=(set,key)=>typeof key==='string' && Object.hasOwn(set,key);
-  const player=()=>({gold:R.gold,hp:R.hp,kills:0,bounty:0,steals:0,hero:R.defaultHero,cooldown:0,
+  const player=()=>({gold:R.gold,hp:R.hp,kills:0,bounty:0,steals:0,hero:R.defaultHero,heroConfirmed:false,shop:[],shopRevision:0,refreshCount:0,cooldown:0,
     buff:0,shield:0,shieldUntil:0,relic:null,spirit:null,spiritUsed:false,ready:false});
   class Game {
     constructor(openingSide=Math.random()<.5?0:1) {
-      this.state={phase:'prepare',wave:0,time:0,players:[player(),player()],
+      this.state={phase:'lobby',wave:0,time:0,players:[player(),player()],
         towers:R.board.slots.map(()=>null),enemies:[],effects:[],result:null};
       this.queue=[]; this.spawnIn=0; this.seq=0; this.step=openingSide;this.openingSide=openingSide;
+      const opening=this.rollShop();
+      for(const p of this.state.players) p.shop=opening.slice();
+    }
+    rollShop() {
+      const types=Object.keys(R.towers);
+      return Array.from({length:R.shop.size},()=>types[Math.floor(Math.random()*types.length)]);
     }
     command(side,action) {
       const s=this.state;
@@ -34,9 +40,22 @@
       const p=s.players[side], a=action, slot=i=>Number.isInteger(i) ? R.board.slots[i] : null;
       const ok={ok:true};
       if (a.kind==='hero') {
-        if (s.wave!==0) return fail('首波开始后，守关角色已经锁定。');
+        if (s.phase!=='lobby' || p.heroConfirmed) return fail('守关人已确定。');
         if (!has(R.heroes,a.hero)) return fail('守关角色不存在。');
-        p.hero=a.hero;p.ready=false;return ok;
+        p.hero=a.hero;return ok;
+      }
+      if (a.kind==='confirmHero') {
+        if (s.phase!=='lobby' || p.heroConfirmed) return fail('守关人已确定。');
+        p.heroConfirmed=true;
+        if(s.players.every(x=>x.heroConfirmed)) s.phase='prepare';
+        return ok;
+      }
+      if(s.phase==='lobby') return fail('双方先确定守关人。');
+      if (a.kind==='refreshShop') {
+        const price=R.shop.refreshBase+p.refreshCount*R.shop.refreshStep;
+        if(p.gold<price) return fail('灵气不足，无法刷新。');
+        p.gold-=price;p.refreshCount++;p.shop=this.rollShop();p.shopRevision++;
+        return ok;
       }
       if (a.kind==='ready') {
         if (s.phase!=='prepare') return fail('妖潮已经开始。');
@@ -48,13 +67,13 @@
         const pos=slot(a.to);
         if (!pos) return fail('请选择地图上的空阵位。');
         if (s.towers[a.to]) return fail('阵位已占用。请先召唤到空位，再拖动合成。');
-        if (!has(R.towers,a.type)) return fail('防守单位不存在。');
-        const t=R.towers[a.type];
-        if (p.gold<t.cost) return fail('灵气不足。');
-        p.gold-=t.cost;
-        s.towers[a.to]={type:a.type,level:1,owner:side,cd:0,shots:0,spiritShots:0};
+        if (!Number.isInteger(a.card) || a.card<0 || a.card>=R.shop.size ||
+            a.revision!==p.shopRevision || !p.shop[a.card]) return fail('货架已变化，请重新选择。');
+        const type=p.shop[a.card];
+        p.shop[a.card]=null;
+        s.towers[a.to]={type,level:1,owner:side,cd:0,shots:0,spiritShots:0};
         this.effect('summon',pos,{side});
-        return ok;
+        return {ok:true,type};
       }
       if (a.kind==='merge') {
         if (!slot(a.from) || !slot(a.to) || a.from===a.to) return fail('请选择另一个阵位。');

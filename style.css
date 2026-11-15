@@ -86,3 +86,40 @@ main{width:min(1120px,100% - 42px);margin:auto;padding:26px 0 12px;position:rela
 #verdict{position:absolute;z-index:5;left:50%;top:45%;transform:translate(-50%,-50%);background:#162521f5;border:1px solid #c4ab76;box-shadow:0 0 100px #000b;color:var(--white);border-radius:6px;min-width:min(330px,93%);text-align:center;padding:18px 23px}.result{font:700 28px var(--serif);margin:7px 0}.result-line{font-size:12px;color:var(--muted);margin-top:8px}
 dialog{width:min(500px,calc(100% - 28px));padding:21px;background:#1c2e28;color:var(--white);border:1px solid #6e806c;border-radius:7px;box-shadow:0 20px 70px #0009}dialog::backdrop{background:#0b1512ba}dialog p,dialog li{font-size:14px;color:#d5ddcf;line-height:1.65}dialog ol{padding-left:22px}dialog .choices{display:grid;gap:8px}dialog .choice{text-align:left}dialog .choice strong{display:block;margin-bottom:4px}dialog input{font:inherit;background:#13231e;color:var(--white);padding:7px;border:1px solid #657668;border-radius:4px;width:100%;margin:7px 0}.room-controls{display:flex;gap:8px;flex-wrap:wrap}
 @media(max-width:650px){main{width:calc(100% - 18px);padding-top:14px}.mode{display:none}.top-right{gap:3px}.top-right button{padding:6px;font-size:11px}.seal{width:32px;height:38px}.wordmark{gap:7px}.players{gap:4px;grid-template-columns:minmax(0,1fr) 81px minmax(0,1fr);margin-bottom:7px}.player{padding:5px 4px;gap:3px}.player .identity{gap:3px}.identity strong{font-size:11px}.identity small,.wealth span,.hp .hp-name{display:none}.crest{width:20px;height:21px;font-size:13px}.wealth b{font-size:18px}.hp{gap:3px;font-size:10px}.player button{font-size:10px;padding:3px}.wave strong{font-size:12px}.wave .eyebrow,#waveHint{font-size:9px;letter-spacing:0}.subhead{font-size:10px;margin:8px 0}.maphead{font-size:13px}.statusline{font-size:11px;min-height:38px}#routeLegend{display:none}.commands{margin-top:7px;padding:7px}.commands-head strong{font-size:13px}.side-pick button{font-size:10px;padding:4px}.card{gap:3px;padding:4px 3px;font-size:11px;grid-template-columns:auto minmax(0,1fr)}.card .glyph{font-size:15px;padding:3px}.card b{grid-column:2;font-size:10px}.card small{font-size:9px}.slot .rank{bottom:-4px}.slot .rune{font-size:8px}footer{font-size:9px}}
+
+.lobby{position:fixed;inset:0;z-index:20;display:grid;place-items:center;padding:12px;background:linear-gradient(#101d1bc9,#0d1917ef),url('assets/huilong-open.webp') center/cover}
+.lobby-panel{width:min(700px,100%);max-height:100%;overflow:auto;padding:22px;border:1px solid #a0845a;background:#172922f2;box-shadow:0 14px 70px #000b;border-radius:8px}
+.lobby-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.lobby-heading h2{font:700 28px var(--serif);margin:4px 0}.lobby-kicker{font-size:11px;letter-spacing:.18em;color:#ccb287}
+.lobby-note,.lobby-status{font-size:12px;color:#bdcbb9;margin:8px 0}
+.lobby-players{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.lobby-player{display:grid;gap:8px;padding:14px;background:#243b30;border:1px solid #567563;border-radius:5px}
+.lobby-player:nth-child(2){border-color:#927558;background:#382f27}
+.lobby-player label{font:700 18px var(--serif);color:#d5e9ce}.lobby-player select{width:100%}
+.hero-description{margin:0;color:#c7d2c1;font-size:12px;min-height:35px}
+.lobby-player button{background:#445c48;border-color:#92a783}.lobby-player button:disabled{opacity:.65}
+dialog{z-index:30}
+.commands{background:linear-gradient(150deg,#293b31,#172721);border-color:#8d7651;box-shadow:inset 0 0 0 2px #15251e,inset 0 0 0 3px #806d4b80}
+.commands-head strong{color:#f5dfb4}.shop-caption{display:flex;justify-content:space-between;align-items:center;gap:4px;margin-top:8px;color:#c6b692;font-size:11px}
+#refresh{padding:5px 7px;background:#665238;border:1px solid #b39463;color:#fff0c7;font-size:11px;white-space:nowrap}
+#cards{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.card{position:relative;min-width:0;min-height:72px;padding:8px 7px;background:linear-gradient(145deg,#405448,#27382f);border:1px solid #687a66;box-shadow:inset 0 0 0 2px #1e302780;border-radius:5px}
+.card .glyph{display:grid;place-items:center;width:34px;height:38px;background:#152c27;border:1px solid #82997b}
+.card strong{font-family:var(--serif);font-size:15px;white-space:nowrap}.card small{margin-top:3px;font-size:10px}
+.card b{align-self:start;font-size:10px;color:#e8cd8b;font-weight:400}
+.card[aria-pressed=true]{border-color:#f1d899;box-shadow:inset 0 0 0 1px #e5ca8b,0 0 9px #eacb6666}
+.card:disabled{opacity:.66;background:#26352d;border-style:dashed}.empty-card{grid-column:1/-1;text-align:center;color:#87998b;font-size:11px}
+@media (orientation:landscape) and (max-height:620px){
+ .lobby-panel{padding:10px 15px}.lobby-heading h2{font-size:20px}.lobby-note,.lobby-status{margin:3px 0;font-size:10px}
+ .lobby-players{gap:7px}.lobby-player{gap:4px;padding:7px}.lobby-player label{font-size:14px}
+ .lobby-player select,.lobby-player button{padding:4px 7px;min-height:27px;font-size:11px}
+ .hero-description{min-height:24px;font-size:10px}
+ main .commands{padding:6px}main .shop-caption{margin-top:4px;font-size:9px}
+ main #refresh{padding:3px 5px;font-size:10px;min-height:25px}
+ main #cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}
+ main .card{grid-template-columns:auto 1fr;min-height:43px;padding:3px;gap:3px}
+ main .card .glyph{width:23px;height:27px;font-size:14px}
+ main .card strong{font-size:11px}main .card small{display:none}
+ main .card b{grid-column:2;font-size:9px;line-height:1}
+ main .command-foot{margin-top:4px}
+}

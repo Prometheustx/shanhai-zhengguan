@@ -14,18 +14,19 @@
   const config = {
     board:{W,H,upper,lower,paths,slots,gates:[lower.at(-1),mirror(lower.at(-1))],mirror,demonBoundary},
     gold:90, waveGold:19, hp:12, maxLevel:3, relicWave:3, relicCost:34, defaultHero:'jingwei',
+    shop:{size:4,refreshBase:8,refreshStep:4},
     levels:[null,{damage:1,range:0},{damage:1.72,range:10},{damage:2.9,range:22}],
     towers:{
-      sword:{name:'御剑徒', glyph:'剑', color:'#91e0d3', cost:22, damage:25, range:114, interval:.86, role:'单体收割', desc:'飞剑锁定最接近关口的敌人，适合抢尾刀。'},
-      thunder:{name:'雷符师', glyph:'雷', color:'#f6ca7e', cost:28, damage:33, range:109, interval:1.52, splash:37, splashRatio:.58, role:'范围清潮', desc:'雷符命中时波及周围妖物。'},
-      frost:{name:'寒灯使', glyph:'灯', color:'#b5c8fc', cost:24, damage:14, range:125, interval:1.06, slow:.68, slowTime:1.7, role:'减速控场', desc:'为命中的妖物挂上寒印，延长它在火力区停留的时间。'}
+      sword:{name:'逐星弩', glyph:'弩', color:'#91e0d3', damage:25, range:114, interval:.86, role:'单体收割', desc:'灵弩连射，优先攻击离终点最近的妖物。'},
+      thunder:{name:'焚天鼎', glyph:'鼎', color:'#f6ca7e', damage:33, range:109, interval:1.52, splash:37, splashRatio:.58, role:'范围攻击', desc:'灵火炸开，波及附近妖物。'},
+      frost:{name:'流光梭', glyph:'梭', color:'#b5c8fc', damage:12, range:120, interval:.48, role:'快速清场', desc:'高速发射灵梭，适合追击快怪和收割残血。'}
     },
     heroes:{
       jingwei:{name:'精卫',glyph:'卫',skill:'衔石',cooldown:20,radius:86,duration:4,slow:.52,desc:'指定区域，碎石带让其中的妖物减速 4 秒。'},
       houyi:{name:'后羿',glyph:'羿',skill:'射日',cooldown:22,radius:100,duration:6,mark:1.52,desc:'标记选区内最强的一只妖物，己方塔对它伤害提高 52%。'},
       nuwa:{name:'女娲',glyph:'娲',skill:'补天',cooldown:23,heal:3,desc:'为己方镇关恢复最多 3 点关耐。'},
       kuafu:{name:'夸父',glyph:'夸',skill:'逐日',cooldown:20,radius:108,duration:6,range:42,desc:'选区内的己方塔在 6 秒内增加 42 射程。'},
-      fuxi:{name:'伏羲',glyph:'羲',skill:'八卦开阵',cooldown:22,radius:104,duration:7,splash:25,desc:'选区内己方雷符师的溅射半径增加 25，持续 7 秒。'},
+      fuxi:{name:'伏羲',glyph:'羲',skill:'八卦开阵',cooldown:22,radius:104,duration:7,splash:25,desc:'选区内己方焚天鼎的溅射半径增加 25，持续 7 秒。'},
       shennong:{name:'神农',glyph:'农',skill:'百草护生',cooldown:22,shield:2,duration:9,desc:'给己方镇关加一层 9 秒的护盾，最多吸收 2 点漏怪伤害。'},
       dayu:{name:'大禹',glyph:'禹',skill:'疏洪',cooldown:24,radius:89,push:47,desc:'击退选区内的妖物；凶兽只后退约三成。'},
       lei:{name:'雷公',glyph:'公',skill:'召雷',cooldown:23,radius:78,duration:6,shred:.25,desc:'击散选区内妖物的护甲，持续 6 秒。'},
@@ -48,7 +49,7 @@
       baize:{name:'白泽',glyph:'泽',anchor:true,radius:100,shred:.12,desc:'附近己方塔攻击时忽略目标最多 12 个百分点护甲。'},
       whiteTiger:{name:'白虎',glyph:'虎',anchor:true,radius:95,damage:1.20,desc:'附近己方塔对凶兽和精英伤害提高 20%。'},
       azureDragon:{name:'青龙',glyph:'龙',anchor:true,radius:95,range:18,desc:'附近己方塔射程增加 18。'},
-      bixie:{name:'辟邪',glyph:'辟',anchor:true,radius:95,splash:15,desc:'附近己方雷符师溅射半径增加 15。'},
+      bixie:{name:'辟邪',glyph:'辟',anchor:true,radius:95,splash:15,desc:'附近己方焚天鼎溅射半径增加 15。'},
       chenghuang:{name:'乘黄',glyph:'乘',gold:6,desc:'每次过波时额外获得 6 灵气。'},
       luwu:{name:'陆吾',glyph:'陆',heal:1,desc:'过波后修复己方镇关 1 点关耐。'}
     },
