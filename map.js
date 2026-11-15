@@ -94,9 +94,11 @@
   };
   const battlefield=load('assets/huilong-open.webp');
   const nuwa=load('assets/nuwa-field.webp');
+  const jingwei=load('assets/jingwei-guard.webp');
   const roster=load('assets/guardians-field.webp');
   const atlasIds=['jingwei','houyi','kuafu','fuxi','shennong','dayu','lei','changxi','xuannv'];
   const loaded=image=>image.complete && image.naturalWidth>0;
+  const reducedMotion=matchMedia('(prefers-reduced-motion: reduce)');
   function zone(c,label,x,y,color) {
     c.fillStyle='#17221ed9';c.fillRect(x-31,y-16,62,23);
     text(c,label,x,y,color,13);
@@ -110,17 +112,32 @@
     c.setLineDash([]);
     for (const pos of slots) {
       const {x,y}=pos;
-      ellipse(c,x,y+3,16,7,'#4b4a3473');
-      poly(c,[[x-14,y],[x-8,y-5],[x+8,y-6],[x+15,y-1],[x+11,y+5],[x-6,y+6]],'#9f987c');
-      poly(c,[[x-14,y],[x-8,y-5],[x+8,y-6],[x+15,y-1],[x-1,y-1]],'#bfb194');
-      path(c,[[x-2,y-5],[x-1,y-1],[x+3,y+1],[x+2,y+4]]);
-      c.strokeStyle='#655d48';c.lineWidth=1;c.stroke();
-      ellipse(c,x-12,y+6,3,1.4,'#c2b28a');
-      ellipse(c,x+14,y+5,2.7,1.3,'#887d5f');
+      const frontier=y<225;
+      ellipse(c,x,y+3,15,6,'#3d3a295b');
+      poly(c,[[x-12,y+2],[x-8,y-4],[x+4,y-5],[x+12,y-1],[x+8,y+4],[x-6,y+5]],frontier?'#82776b':'#8d8967');
+      poly(c,[[x-12,y+2],[x-8,y-4],[x+4,y-5],[x+12,y-1],[x-1,y]],frontier?'#9d8c7d':'#aea27c');
+      path(c,[[x-2,y-3],[x-1,y],[x+4,y+2]]);
+      c.strokeStyle=frontier?'#574c45':'#6b604a';c.lineWidth=1;c.stroke();
+      ellipse(c,x-12,y+5,2.3,1.1,'#9b8d69');
+      ellipse(c,x+13,y+4,2,1,'#827a5f');
     }
     zone(c,'魔界裂隙',622,34,'#e8c5ff');
     zone(c,'前沿哨位',392,92,'#ffe2b0');
     c.restore();
+  }
+  function drawPlatformEnergy(c,state){
+    const time=reducedMotion.matches?0:state.time;
+    for (const pos of slots) {
+      if (state.towers[pos.id]) continue;
+      const {x,y,id}=pos;
+      ellipse(c,x,y,10,4,'#dcecc834');
+      for(let i=0;i<3;i++){
+        const rise=(time*.47+id*.27+i/3)%1;
+        c.globalAlpha=Math.sin(rise*Math.PI)*.7;
+        ellipse(c,x+(i-1)*4+Math.sin(rise*5+i)*2,y-2-rise*13,1.35,2.2,'#deefd8');
+      }
+    }
+    c.globalAlpha=1;
   }
   function drawGuardians(c,state) {
     for (const [side,player] of state.players.entries()) {
@@ -130,9 +147,10 @@
       c.save();
       c.translate(x,y+5);
       if (player.hero==='nuwa'?side===0:side===1) c.scale(-1,1);
-      if (player.hero==='nuwa' && loaded(nuwa)) {
-        const width=size*nuwa.naturalWidth/nuwa.naturalHeight;
-        c.drawImage(nuwa,-width/2,-size,width,size);
+      const portrait=player.hero==='nuwa'?nuwa:player.hero==='jingwei'?jingwei:null;
+      if (portrait && loaded(portrait)) {
+        const width=size*portrait.naturalWidth/portrait.naturalHeight;
+        c.drawImage(portrait,-width/2,-size,width,size);
       } else if (loaded(roster) && atlasIds.includes(player.hero)) {
         const i=atlasIds.indexOf(player.hero), w=roster.naturalWidth/3, h=roster.naturalHeight/3;
         c.drawImage(roster,i%3*w,Math.floor(i/3)*h,w,h,-size*.49,-size*1.015,size*.98,size*1.12);
@@ -150,6 +168,7 @@
   }
   function draw(c,s,aim) {
     drawTerrain(c);
+    drawPlatformEnergy(c,s);
     for (const [side,player] of s.players.entries()) {
       if (!player.spirit) continue;
       const spirit=Rules.spirits[player.spirit.kind], anchor=Rules.board.slots[player.spirit.slot];

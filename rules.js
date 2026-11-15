@@ -8,8 +8,8 @@
   const paths = [upper, upper.map(mirror)].map(branch =>
     [lower,lower.map(mirror)].map(tail => branch.concat(tail.slice(1))));
   const demonBoundary = 70;
-  const slots = [[458,94],[327,102],[435,197],[260,213],[421,284],[472,324],
-    [332,260],[229,366],[382,364],[348,482],[467,452],[266,422]].flatMap((p,i) =>
+  const slots = [[469,94],[401,94],[477,183],[251,196],[421,284],[472,324],
+    [366,290],[222,381],[382,364],[372,481],[467,452],[266,422]].flatMap((p,i) =>
     [p,mirror(p)].map(([x,y],side) => ({ id:i*2+side, x,y, side, label:(side ? '右' : '左') + (i+1) })));
   const config = {
     board:{W,H,upper,lower,paths,slots,gates:[lower.at(-1),mirror(lower.at(-1))],mirror,demonBoundary},

@@ -2,7 +2,8 @@
   'use strict';
   const R=Rules, $=id=>document.getElementById(id);
   const board=$('board'), c=$('map').getContext('2d'), dialog=$('dialog'), body=$('dialogBody');
-  const names=['左关','右关'], ranks=['','壹','贰','叁'];
+  const mark=$('dragMark');
+  const names=['左关','右关'];
   let game=new Engine.Game(), s=game.state, side=0, session=null, online=[false,false], restart=[false,false];
   let picked='sword', from=null, hover=null, targeting=null, drag=null, lastUI='', lastSlots='', last=performance.now(), acc=0;
   const slotButtons=R.board.slots.map(slot=>{
@@ -14,9 +15,8 @@
     btn.addEventListener('pointerenter',()=>hover=slot.id);
     btn.addEventListener('pointerleave',()=>{if(hover===slot.id) hover=null;});
     btn.addEventListener('pointerdown',e=>{
-      if(e.button!==0 || targeting || s.towers[slot.id]?.owner!==side || s.phase==='over') return;
-      drag={slot:slot.id,side,id:e.pointerId,x:e.clientX,y:e.clientY,moved:false};
-      btn.setPointerCapture(e.pointerId);
+      if(targeting || s.towers[slot.id]?.owner!==side) return;
+      beginDrag(e,{kind:'merge',slot:slot.id,type:s.towers[slot.id].type});
     });
     return btn;
   });
@@ -29,7 +29,8 @@
     const b=document.createElement('button');
     b.type='button';b.className='card';b.style.setProperty('--glyph',t.color);b.title=t.desc;
     b.innerHTML='<span class="glyph">'+t.glyph+'</span><span><strong>'+t.name+'</strong><small>'+t.role+'</small></span><b>'+t.cost+' 灵气</b>';
-    b.onclick=()=>{from=null;picked=type;targeting=null;msg('请选择任意空阵位召唤'+t.name+'。');};
+    b.onclick=()=>{from=null;picked=type;targeting=null;msg('把'+t.name+'拖到空阵台，或点选空阵台。');};
+    b.onpointerdown=e=>beginDrag(e,{kind:'place',type});
     $('cards').append(b);
     return [type,b];
   });
@@ -74,18 +75,21 @@
   function msg(message,error=false){$('msg').textContent=message;$('msg').classList.toggle('error',error);}
   function setSide(i){
     if(session||side===i) return;
+    clearDrag();
     side=i;from=null;targeting=null;msg('当前由'+names[i]+'玩家操作。');
   }
   function show(title,html){
+    clearDrag();
     $('dialogTitle').textContent=title;body.innerHTML=html;
     if(!dialog.open) dialog.showModal();
   }
   $('closeDialog').onclick=()=>dialog.close();
   $('help').onclick=()=>show('回龙谷 · 对战规则',
-    '<ol><li>每人选一名守关人，在全图任意空阵位召唤单位。双方就绪进入下一波。</li><li>妖物出生时锁定最终关口。塔攻击射程内最接近终点的妖物，妖物被击败后释放灵气，归打出最后一击的塔主。</li><li>把自己的塔拖到同种同阶塔上，或先后点选两座塔。目标升一阶，归发起者。叁阶封顶。</li><li>守关人有一项主动技能。第二波后可选一只自动助阵的灵兽，并购买一件神器。</li><li>一方先破关即败。六波后先比关耐，再比击杀灵气。胜者执掌封印。</li></ol><p>本地模式点击左右切换操作人。联机房间里各自操作自己的席位。</p>');
+    '<ol><li>选一名守关人，把单位卡拖到亮起的空阵台，或先点卡再点阵台。全图阵台由双方共享。</li><li>妖物出生时锁定最终关口。塔攻击射程内最接近终点的妖物，击杀所得灵气归打出最后一击的塔主。</li><li>把自己的塔拖到同种同级塔上，或先后点选两座塔。目标升一级并归发起者。塔下方的点表示等级，最多三级。</li><li>双方就绪进入下一波。第二波后可以选灵兽和神器，守关人也可以主动施放技能。</li><li>一方先破关即败。六波后先比关耐，再比击杀灵气。胜者执掌封印。</li></ol><p>本地模式点击左右切换操作人。联机房间里各自操作自己的席位。</p>');
   function reset(){
+    clearDrag();
     game=new Engine.Game();s=game.state;side=0;picked='sword';from=null;targeting=null;lastUI='';lastSlots='';
-    msg('先布阵，再让双方就绪。');
+    msg('拖动单位，修饰空阵台。');
   }
   $('restart').onclick=()=>{
     if(session) return command({kind:'restart'});
@@ -189,33 +193,64 @@
     const bounds=board.getBoundingClientRect();
     return {x:(e.clientX-bounds.left)/bounds.width*R.board.W,y:(e.clientY-bounds.top)/bounds.height*R.board.H};
   }
-  board.addEventListener('pointermove',e=>{
+  let suppressPointerClick=false;
+  document.addEventListener('pointerdown',()=>{suppressPointerClick=false;},true);
+  function beginDrag(e,source){
+    if(drag || e.button!==0 || !e.isPrimary || s.phase==='over') return;
+    drag={...source,side,id:e.pointerId,x:e.clientX,y:e.clientY,moved:false,over:null,element:e.currentTarget,session};
+    e.currentTarget.setPointerCapture(e.pointerId);
+  }
+  function clearDrag(){
+    if(!drag) return;
+    const {element,id,moved}=drag;
+    drag=null;mark.hidden=true;
+    if(moved) {from=null;suppressPointerClick=true;}
+    if(element.hasPointerCapture(id)) element.releasePointerCapture(id);
+  }
+  function slotAt(e){
+    const button=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-slot]');
+    return button?Number(button.dataset.slot):null;
+  }
+  const canPlace=type=>s.phase!=='over' && (!session||online[side]) && s.players[side].gold>=R.towers[type].cost;
+  document.addEventListener('pointermove',e=>{
     if(!drag || e.pointerId!==drag.id) return;
     if(!drag.moved && Math.hypot(drag.x-e.clientX,drag.y-e.clientY)<6) return;
-    drag.moved=true;from=drag.slot;
-    const mark=$('dragMark'), p=position(e), t=s.towers[drag.slot];
-    if(!t) return;
-    mark.hidden=false;mark.textContent=R.towers[t.type].glyph;
-    mark.style.left=100*p.x/R.board.W+'%';mark.style.top=100*p.y/R.board.H+'%';
+    if(!drag.moved){
+      drag.moved=true;targeting=null;
+      board.classList.remove('aim');
+      from=drag.kind==='merge'?drag.slot:null;
+      picked=drag.type;
+      if(drag.kind==='place') {
+        const affordable=canPlace(drag.type);
+        msg(affordable?'松手修饰亮起的阵台。':'当前无法修饰阵台，请检查灵气和连接。',!affordable);
+      }
+      const unit=R.towers[drag.type];
+      mark.hidden=false;mark.textContent=unit.glyph;mark.style.color=unit.color;
+    }
+    drag.over=slotAt(e);
+    mark.style.left=e.clientX+'px';mark.style.top=(e.clientY-(e.pointerType==='touch'?18:0))+'px';
   });
-  let suppressClick=false;
+  document.addEventListener('click',e=>{
+    if(suppressPointerClick && e.detail>0){
+      suppressPointerClick=false;e.preventDefault();e.stopImmediatePropagation();
+    }
+  },true);
   board.addEventListener('click',e=>{
-    if(suppressClick){e.preventDefault();e.stopImmediatePropagation();return;}
     if(targeting?.kind==='skill'){
       const a=position(e);targeting=null;command({kind:'skill',...a});
     }
   },true);
-  for (const name of ['pointerup','pointercancel','lostpointercapture']) board.addEventListener(name,e=>{
+  for (const name of ['pointerup','pointercancel','lostpointercapture']) document.addEventListener(name,e=>{
     if(!drag || drag.id!==e.pointerId) return;
-    const d=drag;drag=null;$('dragMark').hidden=true;
-    if(!d.moved) return;
-    from=null;suppressClick=true;setTimeout(()=>suppressClick=false,0);
-    if(name!=='pointerup' || d.side!==side) return;
-    const node=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-slot]');
-    if(node) command({kind:'merge',from:d.slot,to:+node.dataset.slot});
-    else msg('拖到同种同阶的塔上才会合成。');
+    const d=drag;
+    clearDrag();
+    if(!d.moved || name!=='pointerup' || d.side!==side || d.session!==session) return;
+    const to=slotAt(e);
+    if(to==null) return msg(d.kind==='place'?'已取消修饰。':'拖到同种同阶的塔上才会合成。');
+    if(d.kind==='place') command({kind:'place',type:d.type,to},d.side);
+    else command({kind:'merge',from:d.slot,to},d.side);
   });
-  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!dialog.open){from=null;targeting=null;}});
+  document.addEventListener('keydown',e=>{if(e.key==='Escape'&&!dialog.open){clearDrag();from=null;targeting=null;}});
   function renderUI(){
     const p=s.players[side], skillWait=Math.max(0,Math.ceil(p.cooldown-s.time)), hero=R.heroes[p.hero], relic=p.relic && R.relics[p.relic.kind];
     const key=JSON.stringify([s.phase,s.wave,s.players.map(x=>[x.hp,x.gold,x.kills,x.bounty,x.steals,x.ready,x.hero,x.relic,x.spirit]),side,skillWait,picked,targeting?.kind,from,s.result,session?.room,online,restart]);
@@ -238,7 +273,7 @@
         $('side'+i).setAttribute('aria-pressed',side===i);$('side'+i).disabled=!!session;
       }
       $('activeSide').textContent=names[side]+' · '+(side+1)+'P';
-      $('selectedTitle').textContent=targeting?.kind==='spirit'?'选择灵兽阵区':targeting?.kind==='relic'?'选择佩戴单位':targeting?.kind==='skill'?'选择施法位置':from!=null?'选择合成目标':'召唤布阵';
+      $('selectedTitle').textContent=targeting?.kind==='spirit'?'选择灵兽阵区':targeting?.kind==='relic'?'选择佩戴单位':targeting?.kind==='skill'?'选择施法位置':from!=null?'选择合成目标':'修饰阵台';
       for(const [type,btn] of cards) {btn.setAttribute('aria-pressed',type===picked&&from==null&&!targeting);btn.disabled=s.phase==='over';}
       $('heroSelect').value=p.hero;$('heroSelect').disabled=s.wave!==0;$('heroSelect').title=hero.desc;
       $('skill').textContent=hero.skill+(skillWait?' · '+skillWait+'秒':'');$('skill').title=hero.desc;
@@ -255,17 +290,22 @@
       board.classList.toggle('aim',targeting?.kind==='skill');
       board.classList.toggle('choosing-spirit',targeting?.kind==='spirit');
     }
-    const skey=JSON.stringify([s.towers.map(t=>t&&[t.owner,t.type,t.level]),s.players.map(p=>p.relic),from,side]);
+    const placement=drag?.moved&&drag.kind==='place'&&canPlace(drag.type);
+    const dropSlot=drag?.moved?drag.over:null;
+    const skey=JSON.stringify([s.towers.map(t=>t&&[t.owner,t.type,t.level]),s.players.map(p=>p.relic),from,side,placement,dropSlot]);
     if(skey!==lastSlots){
       lastSlots=skey;
       for(const pos of R.board.slots){
         const i=pos.id, btn=slotButtons[i], t=s.towers[i], a=t&&s.players[t.owner].relic;
         const r=a?.slot===i?R.relics[a.kind]:null;
-        const label=pos.label+(t?' · '+names[t.owner]+' '+R.towers[t.type].name+' '+ranks[t.level]+'阶'+(r?' · '+r.name:''):' · 空阵位');
+        const label=pos.label+(t?' · '+names[t.owner]+' '+R.towers[t.type].name+' '+t.level+'级'+(r?' · '+r.name:''):' · 空阵台');
         btn.style.setProperty('--side',t?BoardArt.colors[t.owner]:'#b5aa82');btn.setAttribute('aria-label',label);btn.title=label;
         btn.classList.toggle('occupied',!!t);btn.classList.toggle('on',i===from);btn.classList.toggle('drop',from!=null&&!!validMerge(from,i));
+        btn.classList.toggle('place-target',!!placement&&!t);
+        btn.classList.toggle('place-hover',!!placement&&!t&&i===dropSlot);
         btn.style.setProperty('--glyph',t?R.towers[t.type].color:'');
-        btn.innerHTML=t?'<span class="glyph">'+R.towers[t.type].glyph+'</span><span class="rank">'+ranks[t.level]+'</span>'+(r?'<span class="rune">'+r.glyph+'</span>':''):'';
+        btn.innerHTML=t?'<span class="glyph">'+R.towers[t.type].glyph+'</span><span class="rank" aria-hidden="true">'+
+          '<i></i>'.repeat(t.level)+'</span>'+(r?'<span class="rune">'+r.glyph+'</span>':''):'';
       }
     }
   }
@@ -276,7 +316,7 @@
       while(acc>=1/60){game.tick(1/60);acc-=1/60;}
     }
     renderUI();
-    const pos=from??hover, t=s.towers[pos], canPreview=pos!=null&&!targeting;
+    const pos=drag?.moved?drag.over:from??hover, t=s.towers[pos], canPreview=pos!=null&&!targeting;
     BoardArt.draw(c,s,canPreview?{slot:pos,range:t?R.towers[t.type].range+R.levels[t.level].range:R.towers[picked].range}:null);
     requestAnimationFrame(frame);
   }

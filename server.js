@@ -8,7 +8,7 @@ const types={'index.html':'text/html; charset=utf-8','style.css':'text/css; char
   'rules.js':'text/javascript; charset=utf-8','engine.js':'text/javascript; charset=utf-8',
   'app.js':'text/javascript; charset=utf-8','map.js':'text/javascript; charset=utf-8',
   'assets/huilong-open.webp':'image/webp','assets/nuwa-field.webp':'image/webp',
-  'assets/guardians-field.webp':'image/webp'};
+  'assets/guardians-field.webp':'image/webp','assets/jingwei-guard.webp':'image/webp'};
 const rooms=new Map();
 const newSeat=()=>({token:randomBytes(24).toString('hex'),stream:null,restart:false});
 const online=room=>room.seats.map(s=>Boolean(s?.stream));
