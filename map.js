@@ -86,55 +86,70 @@
     c.fillStyle=color;c.fillRect(x-3,y-6,6,13);
     text(c,name,isEntrance?x+49:x,isEntrance?y+5:y+40,color,14);
   }
-  gate(bg,...upper[0],'#cba6f0','鬼門',true);gates.forEach(([x,y],i)=>gate(bg,x,y,colors[i],i?'右關':'左關'));
+  gate(bg,...upper[0],'#cba6f0','鬼門',true);
   const load = source => {
     const image = new Image();
     image.src = source;
     return image;
   };
-  const battlefield=load('assets/huilong-invasion.webp');
-  const nuwa=load('assets/nuwa-battle.webp');
+  const battlefield=load('assets/huilong-open.webp');
+  const nuwa=load('assets/nuwa-field.webp');
+  const roster=load('assets/guardians-field.webp');
+  const atlasIds=['jingwei','houyi','kuafu','fuxi','shennong','dayu','lei','changxi','xuannv'];
   const loaded=image=>image.complete && image.naturalWidth>0;
   function zone(c,label,x,y,color) {
     c.fillStyle='#17221ed9';c.fillRect(x-31,y-16,62,23);
     text(c,label,x,y,color,13);
   }
   function drawTerrain(c) {
-    if (!loaded(battlefield)) {c.drawImage(land,0,0);return;}
-    c.drawImage(battlefield,0,0,W,H);
+    c.drawImage(loaded(battlefield)?battlefield:land,0,0,W,H);
     c.save();
     c.lineCap='round';c.lineJoin='round';
-    c.strokeStyle='#715a4680';c.lineWidth=2;c.setLineDash([4,8]);
+    c.strokeStyle='#715a4656';c.lineWidth=1.6;c.setLineDash([4,9]);
     for (const line of roads) {path(c,line);c.stroke();}
     c.setLineDash([]);
     for (const pos of slots) {
-      ellipse(c,pos.x,pos.y+4,24,17,'#2330279c');
-      ellipse(c,pos.x,pos.y,24,17,'#8c8c70');
-      ellipse(c,pos.x,pos.y-2,22,15,'#b2a687');
-      ellipse(c,pos.x,pos.y-2,17,12,'#5d6757');
+      const {x,y}=pos;
+      ellipse(c,x,y+3,16,7,'#4b4a3473');
+      poly(c,[[x-14,y],[x-8,y-5],[x+8,y-6],[x+15,y-1],[x+11,y+5],[x-6,y+6]],'#9f987c');
+      poly(c,[[x-14,y],[x-8,y-5],[x+8,y-6],[x+15,y-1],[x-1,y-1]],'#bfb194');
+      path(c,[[x-2,y-5],[x-1,y-1],[x+3,y+1],[x+2,y+4]]);
+      c.strokeStyle='#655d48';c.lineWidth=1;c.stroke();
+      ellipse(c,x-12,y+6,3,1.4,'#c2b28a');
+      ellipse(c,x+14,y+5,2.7,1.3,'#887d5f');
     }
     zone(c,'魔界裂隙',622,34,'#e8c5ff');
     zone(c,'前沿哨位',392,92,'#ffe2b0');
-    zone(c,'人界防线',612,431,'#e0f0c8');
     c.restore();
   }
   function drawGuardians(c,state) {
-    if (!loaded(nuwa)) return;
     for (const [side,player] of state.players.entries()) {
-      if (player.hero!=='nuwa') continue;
       const [x,y]=gates[side];
-      const markerX=x+(side===0?-77:77), bottom=y-29, size=67;
-      ellipse(c,markerX,bottom-4,24,6,'#14271bd0');
+      const size=97;
+      ellipse(c,x,y+1,17,5,'#211f19a0');
       c.save();
-      c.translate(markerX,bottom);
-      if (side===1) c.scale(-1,1);
-      c.drawImage(nuwa,-size/2,-size,size,size);
+      c.translate(x,y+5);
+      if (player.hero==='nuwa'?side===0:side===1) c.scale(-1,1);
+      if (player.hero==='nuwa' && loaded(nuwa)) {
+        const width=size*nuwa.naturalWidth/nuwa.naturalHeight;
+        c.drawImage(nuwa,-width/2,-size,width,size);
+      } else if (loaded(roster) && atlasIds.includes(player.hero)) {
+        const i=atlasIds.indexOf(player.hero), w=roster.naturalWidth/3, h=roster.naturalHeight/3;
+        c.drawImage(roster,i%3*w,Math.floor(i/3)*h,w,h,-size*.49,-size*1.015,size*.98,size*1.12);
+      } else {
+        poly(c,[[-13,-4],[-8,-27],[-4,-33],[4,-33],[10,-27],[14,-4]],'#414a3d');
+        ellipse(c,0,-36,6,7,'#eadbc1');
+        text(c,Rules.heroes[player.hero].glyph,0,-13,colors[side],12);
+      }
       c.restore();
+      c.font='bold 12px "Microsoft YaHei", sans-serif';c.textAlign='center';
+      const label=Rules.heroes[player.hero].name;
+      c.lineWidth=3;c.strokeStyle='#232c21';c.strokeText(label,x,y+17);
+      c.fillStyle=colors[side];c.fillText(label,x,y+17);
     }
   }
   function draw(c,s,aim) {
     drawTerrain(c);
-    drawGuardians(c,s);
     for (const [side,player] of s.players.entries()) {
       if (!player.spirit) continue;
       const spirit=Rules.spirits[player.spirit.kind], anchor=Rules.board.slots[player.spirit.slot];
@@ -144,7 +159,7 @@
         text(c,spirit.name,anchor.x,anchor.y-29,colors[side],13);
       } else {
         const [x,y]=gates[side];
-        text(c,spirit.name,x,y-31,colors[side],13);
+        text(c,spirit.name,x+(side===0?-40:40),y-13,colors[side],13);
       }
     }
     if(aim?.slot!=null){
@@ -170,6 +185,7 @@
       }
       poly(c,[[e.x-3,e.y+r+4],[e.x+3,e.y+r+4],[e.x,e.y+r+8]],colors[e.gate]);
     }
+    drawGuardians(c,s);
     for(const f of s.effects){
       const p=Math.max(0,Math.min(1,(s.time-f.at)/f.duration)), color=colors[f.side];
       c.save();c.globalAlpha=1-p;

@@ -46,11 +46,11 @@
       }
       if (a.kind==='place') {
         const pos=slot(a.to);
-        if (!pos || pos.side!==side) return fail('只能召唤到自己半场的空阵位。');
+        if (!pos) return fail('请选择地图上的空阵位。');
         if (s.towers[a.to]) return fail('阵位已占用。请先召唤到空位，再拖动合成。');
         if (!has(R.towers,a.type)) return fail('防守单位不存在。');
         const t=R.towers[a.type];
-        if (p.gold<t.cost) return fail('灵石不足。');
+        if (p.gold<t.cost) return fail('灵气不足。');
         p.gold-=t.cost;
         s.towers[a.to]={type:a.type,level:1,owner:side,cd:0,shots:0,spiritShots:0};
         this.effect('summon',pos,{side});
@@ -80,7 +80,7 @@
         if (!supportOpen || s.phase!=='prepare') return fail('第二波结束后可在布阵阶段选择灵兽。');
         if (p.spirit || !has(R.spirits,a.spirit)) return fail('每局只能选定一只灵兽。');
         const spirit=R.spirits[a.spirit], pos=slot(a.to);
-        if (spirit.anchor && pos?.side!==side) return fail('请选择自己半场的阵位安置灵兽。');
+        if (spirit.anchor && !pos) return fail('请选择地图上的阵位安置灵兽。');
         p.spirit={kind:a.spirit,slot:spirit.anchor?a.to:null};
         p.ready=false;
         const [x,y]=R.board.gates[side];
@@ -93,7 +93,7 @@
         const relic=R.relics[a.relic];
         if (!relic.gate && (!slot(a.to) || s.towers[a.to]?.owner!==side)) return fail('请选择己方单位佩戴神器。');
         if (p.relic && (p.relic.kind!==a.relic || relic.gate)) return fail('每人一局只能选定一件神器。');
-        if (!p.relic && p.gold<R.relicCost) return fail('灵石不足。');
+        if (!p.relic && p.gold<R.relicCost) return fail('灵气不足。');
         if (!p.relic) p.gold-=R.relicCost;
         if (p.relic?.slot!=null) s.towers[p.relic.slot].shots=0;
         if (!relic.gate) s.towers[a.to].shots=0;
@@ -177,7 +177,7 @@
       if(e.hp>0) return;
       const p=this.state.players[owner], reward=d.reward+(relic?.bonus||0);
       p.gold+=reward;p.bounty+=reward;p.kills++;
-      this.effect('bounty',e,{side:owner,text:'+'+reward,duration:.68});
+      this.effect('bounty',e,{side:owner,text:'+'+reward+' 灵气',duration:.68});
     }
     tick(dt) {
       const s=this.state;

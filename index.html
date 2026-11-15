@@ -2,7 +2,7 @@
 <html lang="zh-CN">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#172623">
   <title>山海争关 · 双人塔防</title>
   <link rel="stylesheet" href="style.css">
@@ -17,28 +17,26 @@
       <div class="wordmark"><span class="seal" aria-hidden="true">山<br>海</span><div><div class="eyebrow">山海异闻录 · 卷一</div><h1>山海争关</h1></div></div>
       <div class="top-right"><span class="mode" id="mode">本地双人</span><button id="room" type="button">联机房间</button><button id="help" type="button">玩法</button><button id="restart" type="button">重开</button></div>
     </header>
-    <div class="subhead"><span>共御妖潮，各争其利。</span><span>共道争赏 · 拖阵夺塔</span></div>
     <section class="players" aria-label="守关状态">
       <div id="player0" class="player p0"></div>
       <div class="wave"><div class="eyebrow" id="waveNum"></div><strong id="waveName"></strong><span id="waveHint"></span></div>
       <div id="player1" class="player p1"></div>
     </section>
     <section class="battlefield" aria-label="回龙谷战场">
-      <div class="maphead"><div><span class="small-seal">陣</span> 回龙谷</div><div class="legend"><span>◇ 左关阵位</span><span>◇ 右关阵位</span></div></div>
-      <div class="board-wrap" id="board">
-        <canvas id="map" width="1040" height="550" aria-label="中央鬼门、双路汇流及左右镇关"></canvas>
+      <div class="maphead"><div>回龙谷</div><div class="legend">全图共享阵位</div></div>
+      <div class="map-frame"><div class="board-wrap" id="board">
+        <canvas id="map" width="1040" height="550" aria-label="中央鬼门、双路汇流及守关人所在的两处道路终点"></canvas>
         <div id="slots"></div>
         <div id="verdict" hidden></div>
         <div class="drag-mark" id="dragMark" hidden></div>
-      </div>
-      <div class="statusline"><span aria-live="polite" id="msg">先布阵，再让双方就绪。</span><span id="routeLegend">鬼门 → 双岔 → 汇流 → 左 / 右关</span></div>
+      </div></div>
+      <div class="statusline"><span aria-live="polite" id="msg">选单位，点空阵位召唤。</span></div>
     </section>
     <section class="commands" id="commands" aria-label="布阵指令">
       <div class="commands-head"><div><span class="eyebrow" id="activeSide"></span><strong id="selectedTitle">召唤布阵</strong></div><div class="side-pick" role="group" aria-label="选择布阵玩家"><button id="side0" type="button">左关 · 1P</button><button id="side1" type="button">右关 · 2P</button></div></div>
       <div id="cards"></div>
       <div class="command-foot"><div class="hero-pick"><label for="heroSelect">守关人</label><select id="heroSelect"></select></div><button id="skill" type="button"></button><button id="spirit" type="button">灵兽</button><button id="relic" type="button">神器</button><span id="relicNote"></span></div>
     </section>
-    <footer><span>山海异闻录 / 对战原型</span><span>点击阵位布置 · 拖拽己方单位合成</span></footer>
   </main>
   <dialog id="dialog"><div class="dialog-head"><h2 id="dialogTitle"></h2><button id="closeDialog" type="button" aria-label="关闭">关闭</button></div><div id="dialogBody"></div></dialog>
 </body>

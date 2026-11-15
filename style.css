@@ -1,5 +1,65 @@
 :root{color-scheme:dark;--ink:#172522;--deep:#101c19;--panel:#1b2b27;--line:#394942;--white:#f3ead7;--muted:#b4bfaf;--dim:#9bab9e;--jade:#97dace;--gold:#eec393;--font:"Microsoft YaHei","PingFang SC",sans-serif;--serif:"Songti SC",STSong,SimSun,serif}
+@media (orientation:landscape) and (max-height:620px) {
+  body main {
+    width:100%;height:100dvh;margin:0;overflow:hidden;
+    padding:max(4px,env(safe-area-inset-top)) max(4px,env(safe-area-inset-right))
+      max(4px,env(safe-area-inset-bottom)) max(4px,env(safe-area-inset-left));
+    display:grid;gap:4px;
+    grid-template-columns:minmax(0,1fr) clamp(144px,24vw,210px);
+    grid-template-rows:auto auto minmax(0,1fr);
+    grid-template-areas:"mast mast" "players players" "map command";
+  }
+  main .masthead{grid-area:mast;min-height:30px}
+  main .wordmark{gap:6px}
+  main .masthead h1{font-size:21px;margin:0}
+  main .wordmark .eyebrow{display:none}
+  main .seal{width:23px;height:26px;font-size:10px}
+  main .top-right{gap:4px}
+  main .top-right button{padding:4px 8px;min-height:30px;font-size:11px}
+  main .players{grid-area:players;margin:0;gap:4px;grid-template-columns:minmax(0,1fr) minmax(82px,.44fr) minmax(0,1fr)}
+  main .player{padding:3px 6px;gap:2px 4px}
+  main .crest{width:21px;height:21px;font-size:13px}
+  main .identity strong,main .player button{font-size:11px}
+  main .identity small{display:none}
+  main .wealth b{font-size:18px}
+  main .wave{padding:2px;gap:0}
+  main .wave strong{font-size:12px;line-height:1.15}
+  main .wave .eyebrow,main #waveHint{font-size:9px;letter-spacing:0;line-height:1.15}
+  main .battlefield{grid-area:map;display:grid;grid-template-rows:minmax(0,1fr) auto;min-height:0}
+  main .maphead{display:none}
+  main .map-frame{min-height:0;container-type:size;display:grid;place-items:center}
+  main .board-wrap{width:min(100%,calc(100cqh * 1040 / 550));height:auto}
+  main .board-wrap canvas{width:100%;height:auto}
+  main .statusline{padding:3px 6px;min-height:22px;font-size:10px}
+  main .commands{grid-area:command;margin:0;min-height:0;padding:5px;overflow:auto}
+  main .commands-head{display:grid;gap:4px}
+  main .commands-head strong{font-size:12px;margin-left:4px}
+  main .side-pick button{min-height:29px;flex:1;padding:3px 4px;font-size:10px}
+  main #cards{grid-template-columns:1fr;margin:4px 0;gap:3px}
+  main .card{grid-template-columns:auto minmax(0,1fr) auto;min-height:27px;padding:2px 4px;gap:4px;font-size:11px}
+  main .card .glyph{font-size:14px;padding:1px 3px}
+  main .card small{display:none}
+  main .card b{grid-column:auto;font-size:10px}
+  main .command-foot{gap:3px}
+  main .hero-pick{width:100%;gap:4px}
+  main .hero-pick label{white-space:nowrap;font-size:10px}
+  main .hero-pick select{flex:1;min-width:0}
+  main .command-foot button,main .hero-pick select{min-height:29px;padding:3px 5px;font-size:10px}
+  main #relicNote{font-size:9px}
+}
+@media (orientation:landscape) and (max-height:360px) {
+  main #relicNote{display:none}
+  main .command-foot{justify-content:space-between}
+}
 .seal-award{display:inline-block;padding:5px 12px;border:1px solid #d5a978;border-radius:3px;background:#6f392c;color:#ffe8bc;font:700 16px var(--serif);letter-spacing:.07em}
+main .slot:not(.occupied):not(.on):not(.drop){
+  border:0;background:transparent;box-shadow:none;cursor:crosshair;
+}
+main .slot:not(.occupied)::before{display:none}
+main .slot:not(.occupied):hover{outline:1px dashed #ffedbd;outline-offset:-3px}
+main .slot:not(.occupied):focus-visible{outline:2px solid #fff1b4}
+main .slot.occupied{width:3.85%;box-shadow:0 2px 5px #1b211c95,inset 0 0 0 2px #293e31;border-width:1.5px}
+main .choosing-spirit .slot:not(.occupied){outline:1px dashed #e7c47e;outline-offset:-3px}
 *{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at 50% 3%,#283832 0%,#15231f 61%,#111d1a 100%);color:var(--white);font-family:var(--font);min-width:310px}body::before{content:"";position:fixed;inset:0;pointer-events:none;background:repeating-linear-gradient(104deg,#afbaa504 0px,#afbaa504 1px,transparent 1px,transparent 5px)}
 main{width:min(1120px,100% - 42px);margin:auto;padding:26px 0 12px;position:relative}button,select{color:var(--white);font:inherit;font-size:13px;border:1px solid #556359;background:#263832;border-radius:4px;padding:8px 12px}button{cursor:pointer}button:hover:not(:disabled),select:hover:not(:disabled){background:#384c42;border-color:#95aa96}button:focus-visible,select:focus-visible,.slot:focus-visible{outline:2px solid #fff1b4;outline-offset:3px}button:disabled,select:disabled{opacity:.53;cursor:default}[hidden]{display:none!important}
 .masthead,.subhead,.maphead,.statusline,.commands-head,footer,.dialog-head{display:flex;justify-content:space-between;align-items:center;gap:12px}.wordmark,.top-right,.legend,.command-foot,.hero-pick{display:flex;align-items:center;gap:10px}.wordmark{gap:13px}.seal,.small-seal{display:inline-grid;place-content:center;border:1px solid #f2b88c;background:#95483a;color:#ffe2bb;font-family:var(--serif);text-align:center;line-height:1.05;box-shadow:inset 0 0 0 2px #482d2a}.seal{width:42px;height:47px;font-size:17px}.small-seal{width:21px;height:22px;margin-right:8px;font-size:13px}.eyebrow{font-size:11px;letter-spacing:.17em;color:#c1caad}h1{font:700 clamp(26px,4vw,39px)/1.18 var(--serif);letter-spacing:.11em;margin:3px 0 0}h2{margin:0;font:700 23px var(--serif)}.mode{font-size:12px;color:var(--muted);border:1px solid var(--line);padding:5px 7px}.subhead{font-size:12px;color:var(--muted);letter-spacing:.12em;margin:13px 0 16px}

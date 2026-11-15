@@ -4,7 +4,7 @@
   const mirror = ([x,y]) => [W-x,y];
   const upper = [[cx,52],[cx,116],[500,132],[418,142],[375,153],[327,175],
     [313,191],[326,204],[389,221],[429,244],[483,255],[510,267],[cx,279]];
-  const lower = [[cx,279],[cx,363],[508,385],[480,398],[400,420],[319,450],[252,473],[231,488]];
+  const lower = [[cx,279],[cx,363],[508,385],[480,398],[400,420],[319,450],[252,473],[215,489],[188,502]];
   const paths = [upper, upper.map(mirror)].map(branch =>
     [lower,lower.map(mirror)].map(tail => branch.concat(tail.slice(1))));
   const demonBoundary = 70;
@@ -37,7 +37,7 @@
       stone:{name:'女娲石',glyph:'石',gate:true,threshold:5,shield:3,desc:'关耐首次降到 5 或以下时先抵消最多 3 点伤害。'},
       bell:{name:'敦煌钟',glyph:'钟',every:3,shred:.23,duration:5,desc:'佩戴塔每第三击削弱目标护甲 5 秒。'},
       mirror:{name:'昆仑镜',glyph:'镜',range:26,desc:'使佩戴塔的射程增加 26。'},
-      cauldron:{name:'神农鼎',glyph:'鼎',bonus:2,desc:'佩戴塔每次尾刀额外获得 2 灵石。'},
+      cauldron:{name:'神农鼎',glyph:'鼎',bonus:2,desc:'佩戴塔每次尾刀额外获得 2 灵气。'},
       seal:{name:'崆峒印',glyph:'印',every:4,damage:1.65,desc:'佩戴塔每第四次攻击的伤害提高 65%。'}
     },
     spirits:{
@@ -49,7 +49,7 @@
       whiteTiger:{name:'白虎',glyph:'虎',anchor:true,radius:95,damage:1.20,desc:'附近己方塔对凶兽和精英伤害提高 20%。'},
       azureDragon:{name:'青龙',glyph:'龙',anchor:true,radius:95,range:18,desc:'附近己方塔射程增加 18。'},
       bixie:{name:'辟邪',glyph:'辟',anchor:true,radius:95,splash:15,desc:'附近己方雷符师溅射半径增加 15。'},
-      chenghuang:{name:'乘黄',glyph:'乘',gold:6,desc:'每次过波时额外获得 6 灵石。'},
+      chenghuang:{name:'乘黄',glyph:'乘',gold:6,desc:'每次过波时额外获得 6 灵气。'},
       luwu:{name:'陆吾',glyph:'陆',heal:1,desc:'过波后修复己方镇关 1 点关耐。'}
     },
     enemies:{

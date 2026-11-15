@@ -29,7 +29,14 @@ for(let i=0;i<R.waves.length;i++){
 const place=(g,side,to,type='sword')=>g.command(side,{kind:'place',to,type});
 const merge=(g,side,from,to)=>g.command(side,{kind:'merge',from,to});
 const g=new Game();
-assert.ok(!place(g,0,1).ok);
+const shared=new Game();
+assert.ok(place(shared,0,1).ok);
+assert.equal(shared.state.towers[1].owner,0);
+assert.ok(place(shared,1,0).ok);
+assert.equal(shared.state.towers[0].owner,1);
+assert.ok(!place(shared,1,1).ok);
+shared.state.wave=2;
+assert.ok(shared.command(0,{kind:'spirit',spirit:'qilin',to:1}).ok);
 assert.ok(!place(g,0,0,'__proto__').ok);
 for(const i of [0,2,1,3]) assert.ok(place(g,i%2,i).ok);
 assert.ok(!merge(g,0,1,0).ok);
