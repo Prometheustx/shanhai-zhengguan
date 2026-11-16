@@ -24,7 +24,7 @@
   class Game {
     constructor(openingSide=Math.random()<.5?0:1,options={}) {
       this.state={phase:'lobby',wave:0,time:0,players:[player(),player()],
-        towers:R.board.slots.map(()=>null),enemies:[],effects:[],result:null,preparationLeft:null};
+        towers:R.board.slots.map(()=>null),enemies:[],effects:[],result:null,preparationLeft:null,paused:false,speed:1};
       this.npc=!!options.npc;
       this.npcWait=0;
       if(this.npc) {
@@ -60,6 +60,16 @@
         return ok;
       }
       if(s.phase==='lobby') return fail('双方先确定守关人。');
+      if(a.kind==='pause') {
+        s.paused=!s.paused;
+        return ok;
+      }
+      if(a.kind==='speed') {
+        if(a.value!==1 && a.value!==2) return fail('无效的速度。');
+        s.speed=a.value;
+        return ok;
+      }
+      if(s.paused) return fail('对局暂停中。');
       if (a.kind==='refreshShop') {
         const price=R.shop.refreshBase+p.refreshCount*R.shop.refreshStep;
         if(p.gold<price) return fail('灵气不足，无法刷新。');
@@ -221,6 +231,10 @@
       this.effect('bounty',e,{side:owner,text:'+'+reward+' 灵气',duration:.68});
     }
     tick(dt) {
+      if(this.state.paused) return;
+      for(let i=0;i<this.state.speed;i++) this.stepTime(dt);
+    }
+    stepTime(dt) {
       const s=this.state;
       s.time+=dt;
       s.effects=s.effects.filter(f=>s.time-f.at<f.duration);

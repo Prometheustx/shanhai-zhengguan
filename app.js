@@ -21,7 +21,7 @@
     return btn;
   });
   for(const [i,name] of names.entries()){
-    $('player'+i).innerHTML='<div class="identity"><span class="crest"></span><div><strong>'+name+' · '+(i+1)+'P</strong><small></small></div></div><div class="wealth"><b></b><span>灵气</span></div><div class="hp"><span class="hp-name">关耐</span><div class="meter"><i></i></div><span class="hp-num"></span></div><button type="button" class="ready"></button>';
+    $('player'+i).innerHTML='<div class="identity"><span class="crest"></span><div><strong>'+name+' · '+(i+1)+'P</strong><small></small></div></div><div class="player-values"><div class="wealth"><span class="qi-icon" aria-hidden="true">✧</span><span>灵气</span><b></b></div><div class="hp"><span class="heart-icon" aria-hidden="true">♥</span><span>守护值</span><b class="hp-num"></b></div></div><button type="button" class="ready"></button>';
     $('player'+i).querySelector('.ready').onclick=()=>command({kind:'ready'},i);
     $('side'+i).onclick=()=>setSide(i);
   }
@@ -40,6 +40,8 @@
   }
   $('lobbyRoom').onclick=()=>$('room').click();
   $('refresh').onclick=()=>{clearDrag();picked=null;command({kind:'refreshShop'});};
+  $('pause').onclick=()=>{clearDrag();command({kind:'pause'});};
+  $('speed').onclick=()=>command({kind:'speed',value:s.speed===1?2:1});
   $('skill').onclick=()=>{
     const p=s.players[side], h=R.heroes[p.hero];
     if(!h.radius) return command({kind:'skill'});
@@ -222,7 +224,7 @@
     const button=document.elementFromPoint(e.clientX,e.clientY)?.closest('[data-slot]');
     return button?Number(button.dataset.slot):null;
   }
-  const canPlace=source=>s.phase!=='over' && s.phase!=='lobby' && (!session||online[side]) &&
+  const canPlace=source=>s.phase!=='over' && s.phase!=='lobby' && !s.paused && (!session||online[side]) &&
     s.players[side].shopRevision===source.revision && s.players[side].shop[source.card]===source.type;
   const canPlaceOn=(source,t)=>!t || (t.type===source.type && t.level===1);
   document.addEventListener('pointermove',e=>{
@@ -267,7 +269,7 @@
   function renderUI(){
     const p=s.players[side], skillWait=Math.max(0,Math.ceil(p.cooldown-s.time)), hero=R.heroes[p.hero], relic=p.relic && R.relics[p.relic.kind];
     const remaining=s.preparationLeft==null?null:Math.ceil(s.preparationLeft);
-    const key=JSON.stringify([s.phase,s.wave,remaining,s.players.map(x=>[x.hp,x.gold,x.kills,x.bounty,x.steals,x.ready,x.hero,x.heroConfirmed,x.shop,x.shopRevision,x.refreshCount,x.relic,x.spirit]),side,skillWait,picked,targeting?.kind,from,s.result,session?.room,online,restart]);
+    const key=JSON.stringify([s.phase,s.wave,s.paused,s.speed,remaining,s.players.map(x=>[x.hp,x.gold,x.kills,x.bounty,x.steals,x.ready,x.hero,x.heroConfirmed,x.shop,x.shopRevision,x.refreshCount,x.relic,x.spirit]),side,skillWait,picked,targeting?.kind,from,s.result,session?.room,online,restart]);
     if(key!==lastUI){
       lastUI=key;
       $('lobby').hidden=s.phase!=='lobby';
@@ -286,17 +288,30 @@
       const wave=R.waves[Math.max(0,s.phase==='prepare'?s.wave:s.wave-1)];
       $('waveNum').textContent='第 '+(s.phase==='prepare'?s.wave+1:s.wave)+' / '+R.waves.length+' 波';
       $('waveName').textContent=wave.name;
-      $('waveHint').textContent=s.phase==='over'?'本局结束':session&&!online.every(Boolean)?(s.phase==='battle'?'暂停 · 等待重连':'等待另一席位'):s.phase==='battle'?'妖潮来袭':s.phase==='prepare'?remaining+' 秒后开战':'选择守关人';
+      $('waveHint').textContent=s.phase==='over'?'本局结束':session&&!online.every(Boolean)?(s.phase==='battle'?'暂停 · 等待重连':'等待另一席位'):s.paused?'已暂停':s.phase==='battle'?'妖潮来袭':s.phase==='prepare'?remaining+' 秒后开战':'选择守关人';
       $('mode').textContent=session?'房间 '+session.room:'单人 · NPC';
+      $('pause').disabled=s.phase==='lobby'||s.phase==='over'||!!(session&&!online.every(Boolean));
+      $('speed').disabled=s.phase==='lobby'||s.phase==='over'||!!(session&&!online.every(Boolean));
+      $('pause').setAttribute('aria-label',s.paused?'继续':'暂停');
+      $('pause').title=s.paused?'继续':'暂停';
+      $('pause').firstElementChild.textContent=s.paused?'▶':'Ⅱ';
+      $('speed').querySelector('.speed-value').textContent='×'+s.speed;
+      $('pauseIndicator').hidden=!s.paused;
       $('restart').textContent=session && restart[side]?'已同意重开':'重开';
       for(const [i,x] of s.players.entries()){
         const el=$('player'+i), h=R.heroes[x.hero], ready=el.querySelector('.ready');
         el.querySelector('.identity strong').textContent=names[i]+(i===1&&!session?' · NPC':' · '+(i+1)+'P');
         el.querySelector('.crest').textContent=h.glyph;el.querySelector('small').textContent=h.name+' · '+x.kills+' 击杀 · '+x.bounty+' 击杀灵气';
-        el.querySelector('.wealth b').textContent=x.gold;el.querySelector('.hp-num').textContent=x.hp+'/'+R.hp;
-        el.querySelector('.meter i').style.width=100*x.hp/R.hp+'%';
+        el.querySelector('.wealth b').textContent=x.gold;el.querySelector('.hp-num').textContent=x.hp;
+        const crest=el.querySelector('.crest');
+        const atlasIds=['jingwei','houyi','kuafu','fuxi','shennong','dayu','lei','changxi','xuannv'];
+        const atlasIndex=atlasIds.indexOf(x.hero);
+        crest.style.backgroundImage=x.hero==='nuwa'?'url("assets/nuwa-field.webp")':atlasIndex>=0?'url("assets/guardians-field.webp")':'';
+        crest.style.backgroundSize=x.hero==='nuwa'?'contain':'300% 300%';
+        crest.style.backgroundPosition=x.hero==='nuwa'?'center':atlasIndex>=0?((atlasIndex%3)*50)+'% '+(Math.floor(atlasIndex/3)*50)+'%':'center';
+        crest.classList.toggle('has-portrait',x.hero==='nuwa'||atlasIndex>=0);
         ready.hidden=(!session&&i===1)||s.wave>0;
-        ready.disabled=s.phase!=='prepare'||s.wave!==0||(session&&(side!==i||!online[side]));
+        ready.disabled=s.paused||s.phase!=='prepare'||s.wave!==0||(session&&(side!==i||!online[side]));
         ready.textContent=s.phase==='battle'?'迎战中':s.phase==='over'?'已结算':x.ready?'已就绪':'就绪';
         ready.setAttribute('aria-label',names[i]+ready.textContent);ready.setAttribute('aria-pressed',x.ready);
         $('side'+i).setAttribute('aria-pressed',side===i);$('side'+i).disabled=true;
@@ -306,7 +321,7 @@
       $('selectedTitle').textContent=targeting?.kind==='spirit'?'选择灵兽阵区':targeting?.kind==='relic'?'选择佩戴单位':targeting?.kind==='skill'?'选择施法位置':from!=null?'选择合成目标':'灵台商店';
       cards.forEach((btn,i)=>{
         const type=p.shop[i],t=R.towers[type];
-        btn.disabled=!t || s.phase==='over' || s.phase==='lobby';
+        btn.disabled=!t || s.paused || s.phase==='over' || s.phase==='lobby';
         btn.setAttribute('aria-pressed',i===picked&&from==null&&!targeting&&!!t);
         btn.title=t?.desc||'已取用';
         if(t) btn.style.setProperty('--glyph',t.color);
@@ -314,11 +329,11 @@
       });
       const cost=R.shop.refreshBase+p.refreshCount*R.shop.refreshStep;
       $('refresh').textContent='换一批 · '+cost+' 灵气';
-      $('refresh').disabled=s.phase==='over'||s.phase==='lobby'||p.gold<cost||!!(session&&!online[side]);
+      $('refresh').disabled=s.paused||s.phase==='over'||s.phase==='lobby'||p.gold<cost||!!(session&&!online[side]);
       $('skill').textContent=hero.skill+(skillWait?' · '+skillWait+'秒':'');$('skill').title=hero.desc;
-      $('skill').disabled=s.phase!=='battle'||skillWait>0;
-      $('relic').disabled=!relicOpen()||s.phase==='over';
-      $('spirit').disabled=!relicOpen()||s.phase!=='prepare'||!!p.spirit;
+      $('skill').disabled=s.paused||s.phase!=='battle'||skillWait>0;
+      $('relic').disabled=s.paused||!relicOpen()||s.phase==='over';
+      $('spirit').disabled=s.paused||!relicOpen()||s.phase!=='prepare'||!!p.spirit;
       $('spirit').textContent=p.spirit?R.spirits[p.spirit.kind].name:'灵兽';
       $('relicNote').textContent=relic ? relic.name+(relic.gate?' · 镇关':p.relic.slot==null?' · 待佩戴':' · '+R.board.slots[p.relic.slot].label) : relicOpen()?('神器 '+R.relicCost+' 灵气'):'第二波后开启灵兽与神器';
       $('verdict').hidden=!s.result;

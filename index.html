@@ -6,6 +6,7 @@
   <meta name="theme-color" content="#172623">
   <title>山海争关 · 双人塔防</title>
   <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="ui-jade.css">
   <script defer src="rules.js"></script>
   <script defer src="engine.js"></script>
   <script defer src="map.js"></script>
@@ -37,6 +38,11 @@
       <div class="maphead"><div>回龙谷</div><div class="legend">全图共享阵台</div></div>
       <div class="map-frame"><div class="board-wrap" id="board">
         <canvas id="map" width="1040" height="550" aria-label="中央鬼门、双路汇流及守关人所在的两处道路终点"></canvas>
+        <div class="battle-controls" role="group" aria-label="战斗控制">
+          <button id="pause" type="button" aria-label="暂停" title="暂停"><span aria-hidden="true">Ⅱ</span></button>
+          <button id="speed" type="button" aria-label="切换倍速" title="切换倍速"><span aria-hidden="true">»</span><span class="speed-value">×1</span></button>
+        </div>
+        <div class="pause-indicator" id="pauseIndicator" hidden>已暂停</div>
         <div id="slots"></div>
         <div id="verdict" hidden></div>
       </div></div>
@@ -44,8 +50,8 @@
     </section>
     <section class="commands" id="commands" aria-label="修饰阵台">
       <div class="commands-head"><div><span class="eyebrow" id="activeSide"></span><strong id="selectedTitle">灵台商店</strong></div><div class="side-pick" role="group" aria-label="选择操作玩家"><button id="side0" type="button">左关 · 1P</button><button id="side1" type="button">右关 · 2P</button></div></div>
-      <div class="shop-caption"><span>四件供奉 · 免费取用</span><button id="refresh" type="button"></button></div>
       <div id="cards"></div>
+      <button id="refresh" type="button"></button>
       <div class="command-foot"><button id="skill" type="button"></button><button id="spirit" type="button">灵兽</button><button id="relic" type="button">神器</button><span id="relicNote"></span></div>
     </section>
   </main>
