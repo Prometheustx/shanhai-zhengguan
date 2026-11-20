@@ -16,8 +16,21 @@ for (const p of slots) {
   assert.deepEqual([slots[p.id^1].x,slots[p.id^1].y],[W-p.x,p.y]);
   assert.ok(p.y-22>R.board.demonBoundary,`${p.label}压到魔界边界`);
 }
+let previousHealthScale=0, previousEnemyHealth=0;
 for(let i=0;i<R.waves.length;i++){
+  const wave=R.waves[i];
   const g=new Game();g.state.wave=i;g.start();
+  let enemyHealth=0;
+  for(const enemy of g.queue) {
+    g.spawn(enemy);
+    const {maxHp}=g.state.enemies.at(-1);
+    assert.equal(maxHp,Math.round(Math.round(R.enemies[enemy.type].hp*wave.hp)*wave.healthScale));
+    enemyHealth+=maxHp;
+  }
+  assert.ok(i===0 ? wave.healthScale===2 : wave.healthScale>previousHealthScale);
+  assert.ok(enemyHealth>previousEnemyHealth);
+  previousHealthScale=wave.healthScale;
+  previousEnemyHealth=enemyHealth;
   for(const type of Object.keys(R.enemies)){
     const tally=[0,0,0,0];
     for(const k of g.queue) if(k.type===type) tally[k.branch*2+k.gate]++;
@@ -107,12 +120,23 @@ function mirroredMatch(openingSide){
         const slot=n*2+side;
         if (!g.state.towers[slot] && !place(g,side,slot,['sword','thunder','sword','frost','thunder'][i%5]).ok) break;
       }
+      if(wave>=2) {
+        for(const n of layout) {
+          const slot=n*2+side,t=g.state.towers[slot];
+          if(t?.level===1) assert.ok(place(g,side,slot,t.type).ok);
+        }
+      }
+      if(wave===2) {
+        assert.ok(g.command(side,{kind:'spirit',spirit:'xuanwu'}).ok);
+        assert.ok(g.command(side,{kind:'relic',relic:'seal',to:side}).ok);
+      }
       if(wave===0) assert.ok(g.command(side,{kind:'ready'}).ok);
     }
     if(wave>0) for(let i=0;i<Math.ceil(R.waveBreak*60)+1 && g.state.phase==='prepare';i++) g.tick(1/60);
     for(let t=0;t<7000 && g.state.phase==='battle';t++) g.tick(1/60);
     assert.equal(g.state.phase,wave===R.waves.length-1?'over':'prepare');
   }
+  assert.equal(g.state.result.reason,'cleared');
   return g.state.players.map(p=>[p.hp,p.kills,p.bounty]);
 }
 assert.deepEqual(mirroredMatch(0).map(p=>p[0]),mirroredMatch(1).reverse().map(p=>p[0]));
@@ -178,4 +202,4 @@ assert.ok(controls.command(0,{kind:'pause'}).ok);
 for(let i=0;i<60;i++) controls.tick(1/60);
 assert.ok(Math.abs(controls.state.preparationLeft-(remaining-2))<.001);
 assert.ok(!controls.command(0,{kind:'speed',value:8}).ok);
-console.log('通过：四条路等长、成对阵位、逐怪种均分、双向合成、击杀结算、法器归属、漏怪、守关技和整局镜像');
+console.log('通过：六波生命阶梯、四路等长、镜像分怪、合成、击杀、神器、漏怪、守关技和整局镜像');

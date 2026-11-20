@@ -124,8 +124,9 @@ body{background:#101d1a}
 .card .glyph{background:#304c3e;border:1px solid #988258;color:var(--glyph);box-shadow:inset 0 0 0 2px #1c332c}
 .card[aria-pressed=true]{background:linear-gradient(145deg,#f6eaca,#d1caa4)}
 .card:disabled{background:#24372e;border-color:#5b6953}.empty-card{color:#a0ad95}
-.card .item-art{display:block;width:44px;height:44px;background-image:url('assets/shop-items.webp');background-repeat:no-repeat;background-size:300% 100%;filter:drop-shadow(0 2px 2px #25352377)}
-.card .item-sword{background-position:0 50%}.card .item-thunder{background-position:50% 50%}.card .item-frost{background-position:100% 50%}
+.item-art{display:block;aspect-ratio:1;background-image:url('assets/ink-combat.webp');background-repeat:no-repeat;background-size:400% 200%;background-position:var(--item-x) 100%}
+.item-sword{--item-x:33.3333%}.item-thunder{--item-x:66.6667%}.item-frost{--item-x:100%}
+.card .item-art{width:44px;filter:drop-shadow(0 2px 2px #25352355)}
 @media (orientation:landscape) and (max-height:620px){main .card .item-art{width:33px;height:35px}}
 .player{background:linear-gradient(110deg,#162f29,#20352b);border-color:#8d7652}
 .crest{border-radius:50%;box-shadow:inset 0 0 0 2px #18291e,0 0 0 1px #d4b579}

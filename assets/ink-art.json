@@ -1,0 +1,223 @@
+{
+  "schema_version": 1,
+  "art_direction_brief": "README.md#描边美术",
+  "assets": [
+    {
+      "id": "ink-valley",
+      "role": "地貌",
+      "path": "assets/ink-valley.webp",
+      "status": "integrated",
+      "tiles": [
+        "魔界岩峰",
+        "魔界裂隙",
+        "边境残垣",
+        "青绿岩山",
+        "瀑布",
+        "松树"
+      ],
+      "technical": {
+        "dimensions": "672x448",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "项目设定与人物识别特征。",
+        "prompt_or_source_record": [
+          "Production-ready environmental sprite kit for an original Chinese mythology mobile tower-defense map, landscape EXACTLY 3 columns x 2 rows of 6 evenly sized square cells. Original Chinese myth xianxia mobile tactics game, youthful stylish donghua and clean 2D cel shading, hand-drawn deep black ink contours with polished variable line weight. Saturated jade, electric turquoise, sun gold, cinnabar and violet accents balanced against clear ivory. Solid matte color regions, 2-3 shade levels, readable at tiny game scale. Clean bold black outer contours, selective black interior linework; no white sticker rim. Real transparent background, empty gutters, no backdrop, no type, no border, no exploded pieces, no grid lines. All objects remain entirely inside equal grid cells, at least 9% empty gutter on each cell edge. All assets are arranged individually for compositing on a separate 2D ground map, strong black contours with flat lighting from upper left. Use slight downward three-quarter game camera, crisp distinct silhouettes, coherent perspective. Top row left to right: 1 small group of three rocky demon-realm sharp obsidian pennant peaks, violet facets with small bright coral lava veins and a black baseline, no ground outside small footprint; 2 a magical purple/black circular rift, surrounded by an asymmetric crown of levitating very dark broken stones and sharp cyan lilac highlights, rimmed in black, its small base touches ground, no road, no other scenery; 3 small battle-ruined wall cluster consisting of collapsed gray blue shale pillars and two fragments of rubble, tiny tattered cinnabar pennant, no baseplate or foreground. Bottom row left to right: 4 jade blue Chinese karst rock cluster with rounded leafy pine branches and grassy little base; 5 a very clean graphic falling turquoise and ivory ribbon waterfall from short stacked jade rocks into a tiny pool, no scenery; 6 small curving pine tree silhouette with clumps of fan-shaped green leaves and slender dark trunk, with a yellow olive accent to help it read. Bold black outlines and cheerful warm highlights, no labels, all cells distinctly spaced, no extra props."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "ink-guardians",
+      "role": "守关人",
+      "path": "assets/ink-guardians.webp",
+      "status": "integrated",
+      "tiles": [
+        "精卫",
+        "后羿",
+        "女娲",
+        "夸父",
+        "伏羲",
+        "神农",
+        "大禹",
+        "雷公",
+        "常羲",
+        "九天玄女"
+      ],
+      "technical": {
+        "dimensions": "1120x448",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "项目已通过的女娲立绘 `画风样稿/青绿角色/nuwa-portrait.png` 作为女娲的角色参考。",
+        "prompt_or_source_record": [
+          "A production game sprite atlas, landscape, EXACTLY 3 columns and 2 rows, six full-body original Chinese myth guardian heroes. Original Chinese myth xianxia mobile tactics game, youthful stylish donghua and clean 2D cel shading, hand-drawn deep black ink contours with polished variable line weight. Saturated jade, electric turquoise, sun gold, cinnabar and violet accents balanced against clear ivory. Solid matte color regions, 2-3 shade levels, readable at tiny game scale. Clean bold black outer contours, selective black interior linework; no white sticker rim. Real transparent background, empty gutters, no backdrop, no type, no border, no exploded pieces, no grid lines. All objects remain entirely inside equal grid cells, at least 9% empty gutter on each cell edge. Fashion-forward adult men and women, handsome expressive faces, sleek long limbs, modernized but recognizable Chinese fantasy tailoring with sashes and fasteners, no bulky layers, clear dominant accent per character. Consistent upright slight 3/4 view, face the player and inward to the right, natural ready stances, full hair and feet visible, objects held close to body and same optical scale. First row left to right: 1 Jingwei, sharp young adult woman with coal-black ponytail and cinnabar feather hair clip, short cream-and-vermillion outfit with ink leggings, folded teal/cinnabar wings tucked close, both hands relaxed by sides, no pointing; 2 Hou Yi, handsome athletic young man with half-up ink hair, gold and blue streamlined embroidered archer coat, holding clearly visible glowing sun-yellow recurve bow diagonally down; 3 Nüwa, serene majestic adult mother goddess, character identity from the attached portrait ONLY, same sapphire-and-gold crown, dark flowing hair and ivory/teal costume, emphasize long upright torso flowing down into a clearly visible slender teal serpent tail as base, warm expression, hands relaxed, no human legs, no infant, clay figure or crafting. Second row left to right: 4 Kuafu tall strong handsome man with crimson headband and bright orange coat over dark trousers, long peachwood staff; 5 Fuxi handsome mature man, cobalt and jade outer layers, black hair, golden bagua trigram emblem held at chest, blue-green serpent tail in place of feet, no musical instrument; 6 Shennong handsome adult healer with small leaf-and-antler headpiece, moss-green sleeveless field coat, orange herb satchel and small seedling. Opaque characters with separate transparent clear margins; strict 3-by-2 order.",
+          "Original Chinese myth game sprite atlas, square EXACTLY 2 columns and 2 rows. Original Chinese myth xianxia mobile tactics game, youthful stylish donghua and clean 2D cel shading, hand-drawn deep black ink contours with polished variable line weight. Saturated jade, electric turquoise, sun gold, cinnabar and violet accents balanced against clear ivory. Solid matte color regions, 2-3 shade levels, readable at tiny game scale. Clean bold black outer contours, selective black interior linework; no white sticker rim. Real transparent background, empty gutters, no backdrop, no type, no border, no exploded pieces, no grid lines. All objects remain entirely inside equal grid cells, at least 9% empty gutter on each cell edge. Exactly 4 full body stylish tall adult guardians with attractive, expressive handsome faces, long slender proportions, modern tailored wuxia coats with color blocking, expressive hair, subtle slanted 3/4 facing toward right. Natural ready stance, full hair and feet visible, no equipment crossing cells. Top-left Da Yu handsome young dark-haired adult surveyor and river hero in bright lapis blue and ivory travel coat, short diagonal copper flood-control spade, a wave shaped sash. Top-right Lei Gong handsome athletic adult thunder deity with slate-violet blue hair, folded slate feathered wings, gold hammer and small lightning accents near chest, indigo suit with citron highlights. Bottom-left Changxi, beautiful dignified young adult East Asian woman with ink hair in a high long ponytail, cobalt/ice blue flowing two-piece robes, crescent silver hair pin and held moon-shaped fan, subtle lavender shadows. Bottom-right Jiutian Xuannü, graceful fierce adult female commander, tied long dark hair, athletic cream/crimson uniform reinforced with sleek dark armor, crimson shoulder ribbon and clearly visible short upright golden spear. Keep margins large, four distinct silhouettes, no platforms or shadows around feet."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "ink-combat",
+      "role": "妖物与灵器",
+      "path": "assets/ink-combat.webp",
+      "status": "integrated",
+      "tiles": [
+        "游魂",
+        "山魈",
+        "甲妖",
+        "蚀月妖将",
+        "饕餮",
+        "逐星弩",
+        "焚天鼎",
+        "流光梭"
+      ],
+      "technical": {
+        "dimensions": "640x320",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "项目设定与人物识别特征。",
+        "prompt_or_source_record": [
+          "Game-ready sheet of exactly eight isolated stickers for an original high-energy Chinese mythology tactics game. EXACTLY four columns by two rows of SQUARE equal cells (whole sheet 2:1). Original Chinese myth xianxia mobile tactics game, youthful stylish donghua and clean 2D cel shading, hand-drawn deep black ink contours with polished variable line weight. Saturated jade, electric turquoise, sun gold, cinnabar and violet accents balanced against clear ivory. Solid matte color regions, 2-3 shade levels, readable at tiny game scale. Clean bold black outer contours, selective black interior linework; no white sticker rim. Real transparent background, empty gutters, no backdrop, no type, no border, no exploded pieces, no grid lines. All objects remain entirely inside equal grid cells, at least 9% empty gutter on each cell edge. Top row left to right: (1) cobalt-and-turquoise wispy floating ghost, big white pupil, flowing smoky body taper, front three-quarters facing right, (2) fast orange-red shaggy mandrill/ape mountain demon crouching with charcoal hands and tail, gameplay profile facing right, (3) larger beetle-armored coral violet and dark plum biped demon with plated shoulders, high front three-quarter view facing right, (4) spirited violet high-ranking lunar demon warrior with mask, black shoulder plates and two electric violet moon blades. Bottom row left to right: (5) Taotie from Chinese myth, boss beast in low four-legged stance, unmistakable wide gluttonous belly maw with geometric teeth and a small horned mask above it, two curving rams horns, radiant orange red and magenta with royal violet highlights, low creature, oriented right; (6) upright sleek mint jade and cream mounted crossbow with two turquoise crescent limbs and one energy arrow, a very small dark tripod base, playful polished carved 2D materials; (7) saffron/coral wide three-legged mythical dǐng vessel with rising flame, dark black outline, stylized like a flame launcher; (8) ultramarine and electric violet levitating angular spindle/shuttle with pale aqua fins and small black metal base, looks very fast. One object each cell, completely separated. No scene, no pedestal wider than assets, no unrelated marks. Readable miniature sprite size. Fix silhouettes with major black contour as a high contrast outline."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "ink-spirits",
+      "role": "灵兽",
+      "path": "assets/ink-spirits.webp",
+      "status": "integrated",
+      "tiles": [
+        "玄武",
+        "麒麟",
+        "凤凰",
+        "九尾狐",
+        "白泽",
+        "白虎",
+        "青龙",
+        "辟邪",
+        "乘黄",
+        "陆吾"
+      ],
+      "technical": {
+        "dimensions": "760x304",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "项目设定与人物识别特征。",
+        "prompt_or_source_record": [
+          "Exactly ten different mythic Chinese animals in order. Wide landscape grid with 5 equally sized columns by 2 rows, strict order, one centered full body sprite per cell. Stickers for an original Chinese mythology tower defense game, vivid turquoise, gold, tangerine, crimson, indigo and fresh green. Crisp deep-black ink contours, clean graphic 2D cel shading, no metal patina or grain, 3/4 game view, recognizable at 32 pixels. Feature one isolated opaque object in the center of each equally spaced cell, at least 10% transparent margin. Real alpha background, no gradient halo, no backdrop, no text, no frames or letters, no platforms. Sleek flowing curves for mystical animals, friendly with strong shape design, all viewed from front three quarters and facing right. Top row left to right: 1 Xuanwu, jade and cobalt black tortoise, a serpent head distinctly curling around a faceted shell, dark violet feet. 2 Qilin, a teal and golden scaled Chinese deer-dragon quadruped with golden antlers, no wings. 3 Phoenix, red and orange vermillion Chinese fenghuang with arching tail feathers and crown, wings spread. 4 Nine-tailed fox, ivory and red highlights, many distinctly separated flowing tails. 5 Baize, white and cyan fluffy Chinese beast with horn pair and indigo mane. Bottom row left to right: 6 White Tiger with bold black stripes, emerald bead, stalking pose. 7 Azure Dragon serpentine blue and mint Chinese dragon, branching antlers, clouds attached to body, no wings. 8 Bixie, violet and orange winged quadruped with large antlers and feline paws. 9 Chenghuang, russet ochre fox-shaped horse-like mythical animal with two small jade horns, no wings. 10 Luwu, gold-striped guardian tiger with small humanoid face on tiger body and fan of tails. No text anywhere."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "ink-relics",
+      "role": "神器",
+      "path": "assets/ink-relics.webp",
+      "status": "integrated",
+      "tiles": [
+        "伏羲琴",
+        "女娲石",
+        "敦煌钟",
+        "昆仑镜",
+        "神农鼎",
+        "崆峒印"
+      ],
+      "technical": {
+        "dimensions": "432x288",
+        "alpha": true,
+        "anchor": "center",
+        "frames": 1,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "项目设定与人物识别特征。",
+        "prompt_or_source_record": [
+          "Sprite sheet in landscape format exactly 3 columns by 2 rows, six separate Chinese fantasy item icons in simple full silhouettes. Stickers for an original Chinese mythology tower defense game, vivid turquoise, gold, tangerine, crimson, indigo and fresh green. Crisp deep-black ink contours, clean graphic 2D cel shading, no metal patina or grain, 3/4 game view, recognizable at 32 pixels. Feature one isolated opaque object in the center of each equally spaced cell, at least 10% transparent margin. Real alpha background, no gradient halo, no backdrop, no text, no frames or letters, no platforms. First row left to right: 1 Fuxi's long antique guqin zither, flat lacquered cyan/jade soundboard and 7 long golden strings arranged diagonally, ivory head with clouds, no character. 2 Nüwa's multicolored mending stone, faceted irregular rock in blue green amber and orange, with small golden prismatic fractures. 3 Dunhuang ceremonial temple bell, scalloped gold bronze in warm orange and blue-green accents, floating ruby red tassel. Second row left to right: 4 Kunlun Mirror, bright round lime-green and turquoise shining face, straight dark carved handle and yellow thin edge. 5 Shennong medicinal tripod urn, teal leaf accents, small elegant amber herbs poking from shallow golden bowl, lime and cream. 6 Kongtong sealing stamp, square cinnabar/vermillion stone base and golden dragon-style carved top. Maintain strict 3x2 arrangement."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "ink-ui",
+      "role": "界面装饰",
+      "path": "assets/ink-ui.webp",
+      "status": "integrated",
+      "tiles": [
+        "青绿祥云",
+        "青玉流苏"
+      ],
+      "technical": {
+        "dimensions": "384x192",
+        "alpha": true,
+        "anchor": "center",
+        "frames": 1,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "项目设定与人物识别特征。",
+        "prompt_or_source_record": [
+          "Create a transparent two-cell mini atlas for a youthful Chinese myth tower-defense interface. Exactly one row, two square cells, an equal-size gap and generous clear padding. Original clean 2D cel shading, precise solid black ink contours, expressive flowing simple shapes, warm rice ivory base and rich mint jade, little golden yellow accents, high graphics readability. Left cell: one wide and low fantasy auspicious cloud sticker, an asymmetrical silk-like ribbon curling through three ivory rounded cloud lobes, with bright mint underside and a short trailing wisp, no face. Right cell: one vertically hanging fantasy jade tassel sticker, looped dark teal cord and knotted moss green diamond bead, elegant hanging mint silk threads with golden fastener and one tiny orange bead. Strong black silhouette line makes both read at 24px. Isolate each separately on genuine transparent alpha, no words, no shadows, no background, all elements within their own cells."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    }
+  ]
+}

@@ -212,7 +212,8 @@
       this.spawnIn=.35;
     }
     spawn({type,branch,gate}) {
-      const s=this.state,d=R.enemies[type], wave=R.waves[s.wave-1], hp=Math.round(d.hp*wave.hp);
+      const s=this.state,d=R.enemies[type], wave=R.waves[s.wave-1];
+      const hp=Math.round(Math.round(d.hp*wave.hp)*wave.healthScale);
       s.enemies.push({id:++this.seq,type,branch,gate,distance:0,...at(branch,gate,0),hp,maxHp:hp,slow:1,slowUntil:0});
     }
     hit(e, damage, owner, relic, spirit, fields) {

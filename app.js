@@ -4,6 +4,16 @@
   const board=$('board'), c=$('map').getContext('2d'), dialog=$('dialog'), body=$('dialogBody');
   const mark=$('dragMark');
   const names=['左关','右关'];
+  const iconGrids={
+    enemy:{ids:Object.keys(R.enemies),columns:4},
+    relic:{ids:Object.keys(R.relics),columns:3},
+    spirit:{ids:Object.keys(R.spirits),columns:5}
+  };
+  function icon(family,id,extra='') {
+    const {ids,columns}=iconGrids[family], index=ids.indexOf(id);
+    const x=index%columns/(columns-1)*100, y=Math.floor(index/columns)*100;
+    return '<span class="myth-art '+family+'-art '+extra+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></span>';
+  }
   let game=new Engine.Game(undefined,{npc:true}), s=game.state, side=0, session=null, online=[false,false], restart=[false,false];
   let picked=null, from=null, hover=null, targeting=null, drag=null, lastUI='', lastSlots='', last=performance.now(), acc=0;
   const slotButtons=R.board.slots.map(slot=>{
@@ -54,7 +64,7 @@
     show('神器 · '+names[side],'<p>每人选定一件。塔上神器可免费换装，合成后随塔升阶，被夺阵时回到原主。女娲石直接守护镇关。</p><div class="choices"></div>');
     for(const [key,a] of Object.entries(R.relics)){
       const b=document.createElement('button');b.type='button';b.className='choice';
-      b.innerHTML='<strong>'+a.name+' · '+(p.relic?.kind===key?'已购':'灵气 '+R.relicCost)+'</strong>'+a.desc;
+      b.innerHTML=icon('relic',key)+'<span><strong>'+a.name+' · '+(p.relic?.kind===key?'已购':'灵气 '+R.relicCost)+'</strong>'+a.desc+'</span>';
       b.disabled=!!p.relic && (p.relic.kind!==key || a.gate);
       b.onclick=()=>{
         dialog.close();from=null;targeting=null;
@@ -69,7 +79,7 @@
     for (const [key,spirit] of Object.entries(R.spirits)) {
       const button=document.createElement('button');
       button.type='button';button.className='choice';
-      button.innerHTML='<strong>'+spirit.name+'</strong>'+spirit.desc;
+      button.innerHTML=icon('spirit',key)+'<span><strong>'+spirit.name+'</strong>'+spirit.desc+'</span>';
       button.onclick=()=>{
         dialog.close();from=null;targeting=null;
         if(!spirit.anchor) return command({kind:'spirit',spirit:key});
@@ -90,8 +100,19 @@
     if(!dialog.open) dialog.showModal();
   }
   $('closeDialog').onclick=()=>dialog.close();
+  const displayedWave=()=>Math.min(R.waves.length-1,Math.max(0,s.wave-(s.phase==='prepare'?0:1)));
+  $('waveDetails').onclick=()=>{
+    const index=displayedWave(), wave=R.waves[index], counts=new Map();
+    for(const [type,count] of wave.groups) counts.set(type,(counts.get(type)||0)+count);
+    const enemies=[...counts].map(([type,count])=>{
+      const enemy=R.enemies[type];
+      return '<li class="wave-enemy">'+icon('enemy',type)+'<span><strong>'+enemy.name+' × '+count+'</strong>　'+enemy.desc+'</span></li>';
+    }).join('');
+    show('第 '+(index+1)+' 波 · '+wave.name,
+      '<p>妖物生命为原版同波的 '+wave.healthScale.toFixed(2)+' 倍。</p><ul>'+enemies+'</ul>');
+  };
   $('help').onclick=()=>show('回龙谷 · 对战规则',
-    '<ol><li>北面的魔界裂隙涌出妖潮，裂隙外是前沿哨位。双方守关人在入场前确定，本地对局的右关由 NPC 操控。</li><li>商店单位免费取用，拖到空阵台召唤，或拖到同种一级塔上合成并夺取。刷新消耗灵气。</li><li>妖物出生时锁定最终关口，击杀灵气归最后一击的塔主。妖物越透明，剩余生命越少。</li><li>首波可点就绪提前开战，也会在 20 秒后自动开始。后续各波自动开始。</li></ol>');
+    '<ol><li>北面的魔界裂隙涌出妖潮，裂隙外是前沿哨位。双方守关人在入场前确定，本地对局的右关由 NPC 操控。</li><li>商店单位免费取用，拖到空阵台召唤，或拖到同种一级塔上合成并夺取。刷新消耗灵气。</li><li>妖物脚下的箭头表示目标关口。击杀灵气归最后一击的塔主，妖物越透明，剩余生命越少。</li><li>首波可点就绪提前开战，也会在 20 秒后自动开始。后续各波自动开始。点击波次标题可查看妖物阵容和生命倍率。</li></ol>');
   function reset(){
     clearDrag();
     game=new Engine.Game(undefined,{npc:true});s=game.state;side=0;picked=null;from=null;targeting=null;lastUI='';lastSlots='';
@@ -240,7 +261,7 @@
         msg(available?'松手放置，或拖到同种一级塔上升级。':'货架已变化，请重新选择。',!available);
       }
       const unit=R.towers[drag.type];
-      mark.hidden=false;mark.textContent=unit.glyph;mark.style.color=unit.color;
+      mark.hidden=false;mark.className='drag-mark item-art item-'+drag.type;mark.style.color=unit.color;
     }
     drag.over=slotAt(e);
     mark.style.left=e.clientX+'px';mark.style.top=(e.clientY-(e.pointerType==='touch'?18:0))+'px';
@@ -278,6 +299,7 @@
       for(const i of [0,1]){
         const x=s.players[i],select=$('hero'+i),panel=$('lobbyPlayer'+i),allowed=session?(side===i&&online[i]):i===0;
         select.value=x.hero;select.disabled=x.heroConfirmed||!allowed;
+        BoardArt.guardianPortrait(panel.querySelector('.lobby-portrait'),x.hero);
         panel.querySelector('.hero-description').textContent=R.heroes[x.hero].desc;
         const confirm=panel.querySelector('.confirm-hero');
         confirm.disabled=x.heroConfirmed||!allowed;
@@ -285,9 +307,10 @@
       }
       $('lobbyNote').textContent=session?'双方各选一位守关人，确认后进入战场。':'选择你的守关人，右关由 NPC 自动应战。';
       $('lobbyStatus').textContent=session?('房间 '+session.room+' · '+(!online.every(Boolean)?'等待另一位玩家连接':'各自确认守关人后进入')):'单人对战 · 右关为 NPC';
-      const wave=R.waves[Math.max(0,s.phase==='prepare'?s.wave:s.wave-1)];
-      $('waveNum').textContent='第 '+(s.phase==='prepare'?s.wave+1:s.wave)+' / '+R.waves.length+' 波';
+      const index=displayedWave(), wave=R.waves[index];
+      $('waveNum').textContent='第 '+(index+1)+' / '+R.waves.length+' 波';
       $('waveName').textContent=wave.name;
+      $('waveDetails').setAttribute('aria-label','查看第 '+(index+1)+' 波 · '+wave.name+'的妖物阵容');
       $('waveHint').textContent=s.phase==='over'?'本局结束':session&&!online.every(Boolean)?(s.phase==='battle'?'暂停 · 等待重连':'等待另一席位'):s.paused?'已暂停':s.phase==='battle'?'妖潮来袭':s.phase==='prepare'?remaining+' 秒后开战':'选择守关人';
       $('mode').textContent=session?'房间 '+session.room:'单人 · NPC';
       $('pause').disabled=s.phase==='lobby'||s.phase==='over'||!!(session&&!online.every(Boolean));
@@ -301,15 +324,9 @@
       for(const [i,x] of s.players.entries()){
         const el=$('player'+i), h=R.heroes[x.hero], ready=el.querySelector('.ready');
         el.querySelector('.identity strong').textContent=names[i]+(i===1&&!session?' · NPC':' · '+(i+1)+'P');
-        el.querySelector('.crest').textContent=h.glyph;el.querySelector('small').textContent=h.name+' · '+x.kills+' 击杀 · '+x.bounty+' 击杀灵气';
+        el.querySelector('small').textContent=h.name+' · '+x.kills+' 击杀 · '+x.bounty+' 击杀灵气';
         el.querySelector('.wealth b').textContent=x.gold;el.querySelector('.hp-num').textContent=x.hp;
-        const crest=el.querySelector('.crest');
-        const atlasIds=['jingwei','houyi','kuafu','fuxi','shennong','dayu','lei','changxi','xuannv'];
-        const atlasIndex=atlasIds.indexOf(x.hero);
-        crest.style.backgroundImage=x.hero==='nuwa'?'url("assets/nuwa-field.webp")':atlasIndex>=0?'url("assets/guardians-field.webp")':'';
-        crest.style.backgroundSize=x.hero==='nuwa'?'contain':'300% 300%';
-        crest.style.backgroundPosition=x.hero==='nuwa'?'center':atlasIndex>=0?((atlasIndex%3)*50)+'% '+(Math.floor(atlasIndex/3)*50)+'%':'center';
-        crest.classList.toggle('has-portrait',x.hero==='nuwa'||atlasIndex>=0);
+        BoardArt.guardianPortrait(el.querySelector('.crest'),x.hero);
         ready.hidden=(!session&&i===1)||s.wave>0;
         ready.disabled=s.paused||s.phase!=='prepare'||s.wave!==0||(session&&(side!==i||!online[side]));
         ready.textContent=s.phase==='battle'?'迎战中':s.phase==='over'?'已结算':x.ready?'已就绪':'就绪';
@@ -324,7 +341,7 @@
         btn.disabled=!t || s.paused || s.phase==='over' || s.phase==='lobby';
         btn.setAttribute('aria-pressed',i===picked&&from==null&&!targeting&&!!t);
         btn.title=t?.desc||'已取用';
-        if(t) btn.style.setProperty('--glyph',t.color);
+        btn.dataset.unit=type||'';
         btn.innerHTML=t?'<span class="item-art item-'+type+'" aria-hidden="true"></span><span><strong>'+t.name+'</strong><small>'+t.role+'</small></span><b>免费</b>':'<span class="empty-card">已取用</span>';
       });
       const cost=R.shop.refreshBase+p.refreshCount*R.shop.refreshStep;
@@ -334,7 +351,8 @@
       $('skill').disabled=s.paused||s.phase!=='battle'||skillWait>0;
       $('relic').disabled=s.paused||!relicOpen()||s.phase==='over';
       $('spirit').disabled=s.paused||!relicOpen()||s.phase!=='prepare'||!!p.spirit;
-      $('spirit').textContent=p.spirit?R.spirits[p.spirit.kind].name:'灵兽';
+      $('spirit').innerHTML=icon('spirit',p.spirit?.kind||'xuanwu')+(p.spirit?R.spirits[p.spirit.kind].name:'灵兽');
+      $('relic').innerHTML=icon('relic',p.relic?.kind||'qin')+'神器';
       $('relicNote').textContent=relic ? relic.name+(relic.gate?' · 镇关':p.relic.slot==null?' · 待佩戴':' · '+R.board.slots[p.relic.slot].label) : relicOpen()?('神器 '+R.relicCost+' 灵气'):'第二波后开启灵兽与神器';
       $('verdict').hidden=!s.result;
       if(s.result){
@@ -357,9 +375,8 @@
         btn.classList.toggle('occupied',!!t);btn.classList.toggle('on',i===from);btn.classList.toggle('drop',from!=null&&!!validMerge(from,i));
         btn.classList.toggle('place-target',!!placement&&canPlaceOn(drag,t));
         btn.classList.toggle('place-hover',!!placement&&canPlaceOn(drag,t)&&i===dropSlot);
-        btn.style.setProperty('--glyph',t?R.towers[t.type].color:'');
-        btn.innerHTML=t?'<span class="glyph">'+R.towers[t.type].glyph+'</span><span class="rank" aria-hidden="true">'+
-          '<i></i>'.repeat(t.level)+'</span>'+(r?'<span class="rune">'+r.glyph+'</span>':''):'';
+        btn.innerHTML=t?'<span class="tower-art item-art item-'+t.type+'" aria-hidden="true"></span><span class="rank" aria-hidden="true">'+
+          '<i></i>'.repeat(t.level)+'</span>'+(r?icon('relic',a.kind,'rune'):''):'';
       }
     }
   }

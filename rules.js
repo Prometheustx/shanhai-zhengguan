@@ -63,12 +63,12 @@
         devour:{threshold:.45,charge:1.65,radius:110,max:2,heal:.14},desc:'凶兽 · 低血蓄力吞食同路小妖回血'}
     },
     waves:[
-      {name:'鬼灯离谷',groups:[['ghost',8]], hp:1, gap:.86},
-      {name:'山魈踏雾',groups:[['spirit',8],['ghost',4]], hp:1.12, gap:.77},
-      {name:'铁甲出山',groups:[['demon',8],['spirit',8]], hp:1.14, gap:.68},
-      {name:'百妖夜渡',groups:[['spirit',8],['demon',8],['ghost',4]], hp:1.38, gap:.60},
-      {name:'妖将叩关',groups:[['demon',8],['spirit',8],['lord',4]], hp:1.45, gap:.57},
-      {name:'饕餮破封',groups:[['demon',8],['spirit',8],['taotie',2],['demon',8]], hp:1.62, gap:.55}
+      {name:'鬼灯离谷',groups:[['ghost',8]], hp:1, healthScale:2, gap:.86},
+      {name:'山魈踏雾',groups:[['spirit',8],['ghost',4]], hp:1.12, healthScale:2.12, gap:.77},
+      {name:'铁甲出山',groups:[['demon',8],['spirit',8]], hp:1.14, healthScale:2.24, gap:.68},
+      {name:'百妖夜渡',groups:[['spirit',8],['demon',8],['ghost',4]], hp:1.38, healthScale:2.36, gap:.60},
+      {name:'妖将叩关',groups:[['demon',8],['spirit',8],['lord',4]], hp:1.45, healthScale:2.48, gap:.57},
+      {name:'饕餮破封',groups:[['demon',8],['spirit',8],['taotie',2],['demon',8]], hp:1.62, healthScale:2.60, gap:.55}
     ]
   };
   if (typeof module === 'object') module.exports = config;
