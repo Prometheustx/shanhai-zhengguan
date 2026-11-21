@@ -36,12 +36,10 @@
       houyi:{name:'后羿',glyph:'羿',skill:'射日',cooldown:22,radius:100,duration:6,mark:1.52,desc:'标记选区内最强的一只妖物，己方塔对它伤害提高 52%。'},
       nuwa:{name:'女娲',glyph:'娲',skill:'补天',cooldown:23,heal:3,desc:'为己方镇关恢复最多 3 点关耐。'},
       kuafu:{name:'夸父',glyph:'夸',skill:'逐日',cooldown:20,radius:108,duration:6,range:42,desc:'选区内的己方攻击灵器在 6 秒内增加 42 射程。'},
-      fuxi:{name:'伏羲',glyph:'羲',skill:'八卦开阵',cooldown:22,radius:104,duration:7,splash:25,desc:'选区内己方五雷令与雷锤的作用半径增加 25，持续 7 秒。'},
       shennong:{name:'神农',glyph:'农',skill:'百草护生',cooldown:22,shield:2,duration:9,desc:'给己方镇关加一层 9 秒的护盾，最多吸收 2 点漏怪伤害。'},
       dayu:{name:'大禹',glyph:'禹',skill:'疏洪',cooldown:24,radius:89,push:47,desc:'击退选区内的妖物；凶兽只后退约三成。'},
       lei:{name:'雷公',glyph:'公',skill:'召雷',cooldown:23,radius:78,duration:6,shred:.25,desc:'击散选区内妖物的护甲，持续 6 秒。'},
-      changxi:{name:'常羲',glyph:'月',skill:'照月',cooldown:23,haste:1.45,duration:5,desc:'己方全阵攻速提高 45%，持续 5 秒。'},
-      xuannv:{name:'九天玄女',glyph:'玄',skill:'授兵',cooldown:21,radius:100,duration:6,damage:1.3,desc:'选区内己方塔伤害提高 30%，持续 6 秒。'}
+      changxi:{name:'常羲',glyph:'月',skill:'照月',cooldown:23,haste:1.45,duration:5,desc:'己方全阵攻速提高 45%，持续 5 秒。'}
     },
     relics:{
       qin:{name:'伏羲琴',glyph:'琴',slow:.56,duration:2,desc:'佩戴塔首次命中山魈时减速 2 秒。'},

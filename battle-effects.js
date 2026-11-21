@@ -7,8 +7,8 @@
   const ease=t=>1-(1-clamp(t))**3;
   const phase=(f,time)=>clamp((time-f.at)/f.duration);
   const aura={
-    jingwei:'#ffb67b',houyi:'#ffda78',nuwa:'#8fffe5',kuafu:'#ffc674',fuxi:'#aeeaff',
-    shennong:'#bcf77c',dayu:'#80e2ff',lei:'#cab2ff',changxi:'#e0daff',xuannv:'#ffb083'
+    jingwei:'#ffb67b',houyi:'#ffda78',nuwa:'#8fffe5',kuafu:'#ffc674',
+    shennong:'#bcf77c',dayu:'#80e2ff',lei:'#cab2ff',changxi:'#e0daff'
   };
 
   function line(c,pts,stroke,width) {

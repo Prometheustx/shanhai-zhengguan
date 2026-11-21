@@ -18,8 +18,9 @@
   const terrain=sheet('ink-valley',3);
   const combat=sheet('ink-combat',4);
   const weapons=sheet('battle-weapons',3);
-  const guardians=sheet('ink-guardians',5);
-  const castPoses=sheet('guardians-cast',5);
+  const guardians=sheet('refined-guardians',4);
+  const castPoses=sheet('refined-guardians-cast',4);
+  const guardianFaces=sheet('refined-guardians-faces',4);
   const walkPoses=sheet('enemies-stride',3);
   const spirits=sheet('ink-spirits',5);
   const relics=sheet('ink-relics',3);
@@ -342,14 +343,12 @@
     }
   }
 
-  function guardianPortrait(element,hero) {
-    const i=guardianIds.indexOf(hero), col=i%5, row=Math.floor(i/5);
-    const zoom=element.classList.contains('crest')?2.45:1;
-    const x=(col+(1-1/zoom)/2)/(5-1/zoom);
-    const y=(row+(zoom===1?0:.018))/(2-1/zoom);
-    element.style.backgroundImage='url("'+guardians.src+'")';
-    element.style.backgroundSize=(500*zoom)+'% '+(200*zoom)+'%';
-    element.style.backgroundPosition=(x*100)+'% '+(y*100)+'%';
+  function guardianPortrait(element,hero,face=false) {
+    const atlas=face?guardianFaces:guardians, i=guardianIds.indexOf(hero), columns=atlas.columns;
+    const x=(i%columns)/(columns-1)*100, y=Math.floor(i/columns)*100;
+    element.style.backgroundImage='url("'+atlas.src+'")';
+    element.style.backgroundSize=(columns*100)+'% 200%';
+    element.style.backgroundPosition=x+'% '+y+'%';
   }
   globalThis.BoardArt={draw,colors,guardianPortrait};
 })();

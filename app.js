@@ -50,8 +50,9 @@
     card.className='hero-card';
     card.dataset.hero=id;
     card.title=h.desc;
-    card.innerHTML='<span class="hero-art" aria-hidden="true"></span><strong>'+h.name+'</strong><small>'+h.skill+'</small>';
-    BoardArt.guardianPortrait(card.firstElementChild,id);
+    card.innerHTML='<span class="hero-visual" aria-hidden="true"><span class="hero-art"></span><span class="hero-face"></span></span><strong>'+h.name+'</strong><small>'+h.skill+'</small>';
+    BoardArt.guardianPortrait(card.querySelector('.hero-art'),id);
+    BoardArt.guardianPortrait(card.querySelector('.hero-face'),id,true);
     card.onclick=()=>{if(!confirming){chosenHero=id;lobbyError='';}};
     $('heroGrid').append(card);
     return card;
@@ -356,7 +357,7 @@
         el.querySelector('.identity strong').textContent=names[i]+(i===1&&!session?' · NPC':' · '+(i+1)+'P');
         el.querySelector('small').textContent=h.name+' · '+x.kills+' 击杀 · '+x.bounty+' 击杀灵气';
         el.querySelector('.wealth b').textContent=x.gold;el.querySelector('.hp-num').textContent=x.hp;
-        BoardArt.guardianPortrait(el.querySelector('.crest'),x.hero);
+        BoardArt.guardianPortrait(el.querySelector('.crest'),x.hero,true);
         ready.hidden=(!session&&i===1)||s.wave>0;
         ready.disabled=s.paused||s.phase!=='prepare'||s.wave!==0||(session&&(side!==i||!online[side]));
         ready.textContent=s.phase==='battle'?'迎战中':s.phase==='over'?'已结算':x.ready?'已就绪':'就绪';

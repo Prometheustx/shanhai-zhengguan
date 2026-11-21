@@ -41,7 +41,7 @@
       "id": "ink-guardians",
       "role": "守关人",
       "path": "assets/ink-guardians.webp",
-      "status": "integrated",
+      "status": "archived",
       "tiles": [
         "精卫",
         "后羿",
@@ -258,7 +258,7 @@
       "id": "guardians-cast",
       "role": "守关人施法关键帧",
       "path": "assets/guardians-cast.webp",
-      "status": "integrated",
+      "status": "archived",
       "tiles": [
         "精卫",
         "后羿",
@@ -319,6 +319,156 @@
         "reference": "assets/ink-combat.webp 原图用于形象和画风参考。",
         "prompt_or_source_record": [
           "Create a companion monster walking keyframe atlas for the five existing monsters in the reference. EXACTLY THREE columns and TWO rows, bottom right cell empty. Production assets for the same Chinese myth tower defense game as the reference. Genuine transparent RGBA canvas, isolated intact sprites, charcoal-black outer ink line, crisp saturated cel-shading, three-quarter game view facing to the RIGHT with a slightly overhead camera, bottom-center foot anchor, clean even edge alpha, ample gutters, equal-sized cells. No names, words, framing, board, opaque backgrounds, grid lines, or ground shadows. Match the reference game art at icon sizes. Match existing exact monsters in the first five cells, ignore the weapon assets. Change limb pose for an alternate walk or charge frame, preserving markings and proportions, no redraw of the color schemes. First row left to right: existing glowing navy and cyan single-eye ghost with a newly stretched S-shape streaming tail and claws extended; same orange shaggy Shankui ape with its near foreleg lifted, far paw on ground running, orange mane and cream eyebrows; same deep plum and red armored demon with one leg stepping out and torso leaning, beetle shoulder horn. Second row left to right: same lavender-haired masked crescent blade demon general in stride, opposite leg forward and one violet crescent blade low; same vermilion Taotie low horned beast, belly maw with carved square teeth and purple highlights, right paws lifted mid-stomp. Last cell is wholly transparent. Same facing direction as reference. No stage, no shadow, no text, no props apart from monster equipment. Separate figures with generous true transparent padding."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "refined-guardians",
+      "role": "八位守关人的细描站姿",
+      "path": "assets/refined-guardians.webp",
+      "status": "integrated",
+      "tiles": [
+        {
+          "hero": "jingwei",
+          "name": "精卫",
+          "idleHeight": 191
+        },
+        {
+          "hero": "houyi",
+          "name": "后羿",
+          "idleHeight": 232
+        },
+        {
+          "hero": "nuwa",
+          "name": "女娲",
+          "idleHeight": 222
+        },
+        {
+          "hero": "kuafu",
+          "name": "夸父",
+          "idleHeight": 245
+        },
+        {
+          "hero": "shennong",
+          "name": "神农",
+          "idleHeight": 213
+        },
+        {
+          "hero": "dayu",
+          "name": "大禹",
+          "idleHeight": 205
+        },
+        {
+          "hero": "lei",
+          "name": "雷公",
+          "idleHeight": 217
+        },
+        {
+          "hero": "changxi",
+          "name": "常羲",
+          "idleHeight": 228
+        }
+      ],
+      "technical": {
+        "dimensions": "1024x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 2,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "以原守关人的服装和道具为身份参考，以确认通过的精卫细描稿为线条和材质参考。每人一张含站姿和施法的透明底原稿。",
+        "prompt_or_source_record": [
+          "jingwei — Production 2D sprite sheet for the original Chinese myth xianxia tower defense game Shan Hai Zheng Guan. Deliver EXACTLY TWO clearly separated FULL BODY cutouts of ONE SAME adult guardian, left and right in a wide transparent atlas. Left is a relaxed next-to-the-road guard stance; right is a more expressive skill pose. Same face, age, body proportion, clothing, equipment and hair on BOTH. Three-quarter view facing RIGHT on both panels, whole bodies from hair to boots or tail fully visible, feet on the same horizontal baseline, 10% clear margins, large genuine transparent gutter between silhouettes. First reference is the costume and identity for this guardian, second reference is the refined Jingwei THIN ink contour, detailed precise feather/cloth rendering and light airy cel-painted finish. Use that second reference ONLY for drawing treatment, never copy its face, physique, feather decorations or costume unless this is Jingwei. Fine near-black tapered outline still visible at 70 pixels tall, delicate inner lines, natural anatomy, readable color blocks in ivory and jade with the guardian's signature palette. Youthful refined Chinese animation look, beautiful game art. Crisp details in face and hands, no heavy uniform stroke, no text, labels or frame, no floor/shadow, no background or aura, no other people, no duplicate limbs. JINGWEI, the adult bird spirit. Use approved red-feather-comb Jingwei directly as identity; keep same eye and nose character, cascades of ink hair, folded teal-and-cinnabar feathers, ivory and crimson layered robe, black leggings, white/gold boots, slender red ribbons. Re-proportion her as a noticeably petite, agile short ADULT woman, a short waist, small narrow shoulders, compact limbs and slightly bigger head in relation to her body (about 6.4 heads tall), round-soft oval lower face with lively eyes and a little brush-like chin. Graceful and light, avoid child design. Left: both hands relaxed down and wings folded close as in approved sprite. Right: casts her pebble spell with one hand flicking a small dark pebble, one teal and red wing half opened. No giant effects.",
+          "houyi — Production 2D sprite sheet for the original Chinese myth xianxia tower defense game Shan Hai Zheng Guan. Deliver EXACTLY TWO clearly separated FULL BODY cutouts of ONE SAME adult guardian, left and right in a wide transparent atlas. Left is a relaxed next-to-the-road guard stance; right is a more expressive skill pose. Same face, age, body proportion, clothing, equipment and hair on BOTH. Three-quarter view facing RIGHT on both panels, whole bodies from hair to boots or tail fully visible, feet on the same horizontal baseline, 10% clear margins, large genuine transparent gutter between silhouettes. First reference is the costume and identity for this guardian, second reference is the refined Jingwei THIN ink contour, detailed precise feather/cloth rendering and light airy cel-painted finish. Use that second reference ONLY for drawing treatment, never copy its face, physique, feather decorations or costume unless this is Jingwei. Fine near-black tapered outline still visible at 70 pixels tall, delicate inner lines, natural anatomy, readable color blocks in ivory and jade with the guardian's signature palette. Youthful refined Chinese animation look, beautiful game art. Crisp details in face and hands, no heavy uniform stroke, no text, labels or frame, no floor/shadow, no background or aura, no other people, no duplicate limbs. HOU YI, the long-limbed young adult divine archer. Distinctive face: lean oblong diamond face with narrow sharp lower jaw and pointed chin, prominent high nasal bridge, composed deep-set narrow dark eyes, sleek upward brows, clean shaven, a keen somewhat aloof expression. Tallest and most slender of the refined men aside from Kuafu, distinctly LONG LEGS and a narrow waist with light athletic archer shoulders, about 8.2 heads tall. Keep black swept-back hair tied high with gold/blue ribbon, tailored lapis blue and ivory coat with golden sun ornament, dark boots, and golden sun-shaped recurved bow as original. Left: tall straight idle, bow in left hand held at side. Right: graceful archer stance with a full golden bow draw toward the right, face still identifiable, no projectiles crossing cells.",
+          "nuwa — Production 2D sprite sheet for the original Chinese myth xianxia tower defense game Shan Hai Zheng Guan. Deliver EXACTLY TWO clearly separated FULL BODY cutouts of ONE SAME adult guardian, left and right in a wide transparent atlas. Left is a relaxed next-to-the-road guard stance; right is a more expressive skill pose. Same face, age, body proportion, clothing, equipment and hair on BOTH. Three-quarter view facing RIGHT on both panels, whole bodies from hair to boots or tail fully visible, feet on the same horizontal baseline, 10% clear margins, large genuine transparent gutter between silhouettes. First reference is the costume and identity for this guardian, second reference is the refined Jingwei THIN ink contour, detailed precise feather/cloth rendering and light airy cel-painted finish. Use that second reference ONLY for drawing treatment, never copy its face, physique, feather decorations or costume unless this is Jingwei. Fine near-black tapered outline still visible at 70 pixels tall, delicate inner lines, natural anatomy, readable color blocks in ivory and jade with the guardian's signature palette. Youthful refined Chinese animation look, beautiful game art. Crisp details in face and hands, no heavy uniform stroke, no text, labels or frame, no floor/shadow, no background or aura, no other people, no duplicate limbs. NÜWA, the mature maternal goddess with loving, stately expression. Distinctive softly full heart-oval face, broad smooth forehead, round cheeks, soft eyes and full warm lips. Different silhouette from the angular slender Changxi and small spirited Jingwei. She has tall erect relaxed shoulders and an elongated adult torso flowing into a long visible coil of slender jade-green serpent tail IN PLACE OF LEGS. Match existing imperial ivory robe with jade panel trim, sapphire and gold crown with little blue hanging ornaments, flowing dark hair and a long green ribbon. Slightly fuller graceful body, gentle dignity. Left hands naturally at her sides in a serene open guard. Right lifting her hands toward a small five-color stone, with the same curled tail clearly visible. No human legs, baby, clay people, children, crafting scene or other props.",
+          "kuafu — Production 2D sprite sheet for the original Chinese myth xianxia tower defense game Shan Hai Zheng Guan. Deliver EXACTLY TWO clearly separated FULL BODY cutouts of ONE SAME adult guardian, left and right in a wide transparent atlas. Left is a relaxed next-to-the-road guard stance; right is a more expressive skill pose. Same face, age, body proportion, clothing, equipment and hair on BOTH. Three-quarter view facing RIGHT on both panels, whole bodies from hair to boots or tail fully visible, feet on the same horizontal baseline, 10% clear margins, large genuine transparent gutter between silhouettes. First reference is the costume and identity for this guardian, second reference is the refined Jingwei THIN ink contour, detailed precise feather/cloth rendering and light airy cel-painted finish. Use that second reference ONLY for drawing treatment, never copy its face, physique, feather decorations or costume unless this is Jingwei. Fine near-black tapered outline still visible at 70 pixels tall, delicate inner lines, natural anatomy, readable color blocks in ivory and jade with the guardian's signature palette. Youthful refined Chinese animation look, beautiful game art. Crisp details in face and hands, no heavy uniform stroke, no text, labels or frame, no floor/shadow, no background or aura, no other people, no duplicate limbs. KUAFU, broad and powerfully built adult man. Strongest mass in the cast with towering shoulders, wide solid chest and wide torso, heavy forearms, thick legs and short muscular neck. Distinctive large broad hexagonal face with wide cheekbones, pronounced broad nose, heavy brows, a wide square-root jaw, a neatly trimmed small dark beard and warm sun-tanned skin. Keep the existing ochre and orange open coat over partial uncovered upper chest, crimson headband, dark trousers and a big crooked peachwood staff with small green leaves. Long airy cloth strips, not bulky furs. Left a steady wide stance, staff upright. Right both hands planting staff forward into the ground with knees flexed, bold chest and arms visible. Warm, handsome and rugged.",
+          "shennong — Production 2D sprite sheet for the original Chinese myth xianxia tower defense game Shan Hai Zheng Guan. Deliver EXACTLY TWO clearly separated FULL BODY cutouts of ONE SAME adult guardian, left and right in a wide transparent atlas. Left is a relaxed next-to-the-road guard stance; right is a more expressive skill pose. Same face, age, body proportion, clothing, equipment and hair on BOTH. Three-quarter view facing RIGHT on both panels, whole bodies from hair to boots or tail fully visible, feet on the same horizontal baseline, 10% clear margins, large genuine transparent gutter between silhouettes. First reference is the costume and identity for this guardian, second reference is the refined Jingwei THIN ink contour, detailed precise feather/cloth rendering and light airy cel-painted finish. Use that second reference ONLY for drawing treatment, never copy its face, physique, feather decorations or costume unless this is Jingwei. Fine near-black tapered outline still visible at 70 pixels tall, delicate inner lines, natural anatomy, readable color blocks in ivory and jade with the guardian's signature palette. Youthful refined Chinese animation look, beautiful game art. Crisp details in face and hands, no heavy uniform stroke, no text, labels or frame, no floor/shadow, no background or aura, no other people, no duplicate limbs. SHENNONG, the refined scholarly adult herbalist, expression curious and composed. Distinctive long soft egg-shaped face with gently rounded small chin, soft eyes with lowered outer lids, almost straight fine brows, narrow soft nose and no facial hair. Fair warm ivory complexion. Lean and fine-boned with narrow shoulders, slender hands, an unhurried almost bowed scholar posture, about 7.4 heads tall, slight smaller frame than Hou Yi. Keep leaf-and-small-antler headpiece, celadon and forest-green travel robes, ivory collar, ochre herb pouch and recognizable sprig in hand. Layer the scholar costume lightly, readable greens and sienna. Left relaxed stance studies small sprig. Right casts a compact leaf protection spell with one extended hand and a few leaves close to the fingers, eyes and face open to camera. Keep sleeves and equipment from obscuring his head.",
+          "dayu — Production 2D sprite sheet for the original Chinese myth xianxia tower defense game Shan Hai Zheng Guan. Deliver EXACTLY TWO clearly separated FULL BODY cutouts of ONE SAME adult guardian, left and right in a wide transparent atlas. Left is a relaxed next-to-the-road guard stance; right is a more expressive skill pose. Same face, age, body proportion, clothing, equipment and hair on BOTH. Three-quarter view facing RIGHT on both panels, whole bodies from hair to boots or tail fully visible, feet on the same horizontal baseline, 10% clear margins, large genuine transparent gutter between silhouettes. First reference is the costume and identity for this guardian, second reference is the refined Jingwei THIN ink contour, detailed precise feather/cloth rendering and light airy cel-painted finish. Use that second reference ONLY for drawing treatment, never copy its face, physique, feather decorations or costume unless this is Jingwei. Fine near-black tapered outline still visible at 70 pixels tall, delicate inner lines, natural anatomy, readable color blocks in ivory and jade with the guardian's signature palette. Youthful refined Chinese animation look, beautiful game art. Crisp details in face and hands, no heavy uniform stroke, no text, labels or frame, no floor/shadow, no background or aura, no other people, no duplicate limbs. DA YU, practical river-taming adult engineer. Use a noticeably SQUARE compact face, straight wide jaw and shorter bridge, slightly heavier eyelids, warm sun-browned cheekbones, a small clean short mustache and thin chin stubble; broad lower face, human and focused. His face MUST NOT resemble the dagger-jawed slender youthful Hou Yi. Medium stature with a strong compact torso, sturdy waist, broad forearms and shorter planted strong legs, about 7 heads tall. Keep the original blue-ivory river robes, gold/bronze fittings, half-tied black hair with teal strand, shoulders with a simple rolled cuff and a curved wicker carry piece, and wide-bladed wooden flood spade distinct from any bow. Left leans on an upright short practical spade, facing right 3/4. Right steps low and sweeps the spade forward to lead flood water, no water splash as background. Strong no-nonsense stance, handsome weathered middle-aged face.",
+          "lei — Production 2D sprite sheet for the original Chinese myth xianxia tower defense game Shan Hai Zheng Guan. Deliver EXACTLY TWO clearly separated FULL BODY cutouts of ONE SAME adult guardian, left and right in a wide transparent atlas. Left is a relaxed next-to-the-road guard stance; right is a more expressive skill pose. Same face, age, body proportion, clothing, equipment and hair on BOTH. Three-quarter view facing RIGHT on both panels, whole bodies from hair to boots or tail fully visible, feet on the same horizontal baseline, 10% clear margins, large genuine transparent gutter between silhouettes. First reference is the costume and identity for this guardian, second reference is the refined Jingwei THIN ink contour, detailed precise feather/cloth rendering and light airy cel-painted finish. Use that second reference ONLY for drawing treatment, never copy its face, physique, feather decorations or costume unless this is Jingwei. Fine near-black tapered outline still visible at 70 pixels tall, delicate inner lines, natural anatomy, readable color blocks in ivory and jade with the guardian's signature palette. Youthful refined Chinese animation look, beautiful game art. Crisp details in face and hands, no heavy uniform stroke, no text, labels or frame, no floor/shadow, no background or aura, no other people, no duplicate limbs. LEI GONG, powerful adult thunder deity. Distinctive angular birdlike face with a pronounced hooked nose, high sloping cheekbones, furrowed dark striking eyes and a slightly narrow chin under a wide brow, cool brown-mauve complexion, slate purple swept hair, small pointed ear-feather ridge. Wide angular upper outline with folded graphite and indigo wings, stout compact chest and powerful long arms on shorter steady legs. Unlike Kuafu's tall body, Lei Gong is more compact with bold wing shape. Keep the violet and charcoal battle garments, gilt lightning marks and a handheld gold thunder hammer. Left hammer hangs at his side, both wings compact. Right hammer lifted ready to strike and wings open just a fraction, low broad stance, face exposed, no sweeping sky lightning past panel.",
+          "changxi — Production 2D sprite sheet for the original Chinese myth xianxia tower defense game Shan Hai Zheng Guan. Deliver EXACTLY TWO clearly separated FULL BODY cutouts of ONE SAME adult guardian, left and right in a wide transparent atlas. Left is a relaxed next-to-the-road guard stance; right is a more expressive skill pose. Same face, age, body proportion, clothing, equipment and hair on BOTH. Three-quarter view facing RIGHT on both panels, whole bodies from hair to boots or tail fully visible, feet on the same horizontal baseline, 10% clear margins, large genuine transparent gutter between silhouettes. First reference is the costume and identity for this guardian, second reference is the refined Jingwei THIN ink contour, detailed precise feather/cloth rendering and light airy cel-painted finish. Use that second reference ONLY for drawing treatment, never copy its face, physique, feather decorations or costume unless this is Jingwei. Fine near-black tapered outline still visible at 70 pixels tall, delicate inner lines, natural anatomy, readable color blocks in ivory and jade with the guardian's signature palette. Youthful refined Chinese animation look, beautiful game art. Crisp details in face and hands, no heavy uniform stroke, no text, labels or frame, no floor/shadow, no background or aura, no other people, no duplicate limbs. CHANGXI, dignified graceful adult moon lady. Unique long narrow oval face, cool pale tone, almond eyes slightly upturned at the outer corners, high fine straight nose, small calm mouth, a small dark beauty mark near one eye. Long elegant neck and straight delicate shoulders, graceful lithe tall dancer's proportions, unhurried poised posture. Match existing moon-blue and ivory draped robes, silver crescent hairpin in high flowing black hair, pale lavender-blue round lunar fan and soft fluttering streamer layers. No gold bird crest or serpent tail. Left holds moon fan neatly beside the body without covering her face. Right raises a moon fan slightly over one shoulder with quiet sweeping motion while silk flows down, same adult face. Keep full boot or hem baseline and skinny silhouette."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "refined-guardians-cast",
+      "role": "八位守关人的细描施法帧",
+      "path": "assets/refined-guardians-cast.webp",
+      "status": "integrated",
+      "tiles": [
+        "精卫",
+        "后羿",
+        "女娲",
+        "夸父",
+        "神农",
+        "大禹",
+        "雷公",
+        "常羲"
+      ],
+      "technical": {
+        "dimensions": "1024x512",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 2,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "八位守关人的双姿态原稿右半。",
+        "prompt_or_source_record": [
+          "与 refined-guardians 使用同批双姿态原稿。此图集裁切施法一侧，提示词见 refined-guardians。"
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "refined-guardians-faces",
+      "role": "八位守关人的脸部特写",
+      "path": "assets/refined-guardians-faces.webp",
+      "status": "integrated",
+      "tiles": [
+        "精卫",
+        "后羿",
+        "女娲",
+        "夸父",
+        "神农",
+        "大禹",
+        "雷公",
+        "常羲"
+      ],
+      "technical": {
+        "dimensions": "832x416",
+        "alpha": true,
+        "anchor": "center",
+        "frames": 1,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "八位守关人的双姿态原稿左半头肩区域。",
+        "prompt_or_source_record": [
+          "从 refined-guardians 的同一站姿原稿裁取头肩像，提示词见 refined-guardians。"
         ]
       },
       "verification": {

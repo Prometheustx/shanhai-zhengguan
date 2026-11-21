@@ -2,6 +2,12 @@
 const assert=require('node:assert/strict');
 const R=require('./rules'),{Game,routes,at}=require('./engine');
 const {W,slots,paths,upper,lower}=R.board;
+assert.deepEqual(Object.keys(R.heroes),['jingwei','houyi','nuwa','kuafu','shennong','dayu','lei','changxi']);
+assert.equal(R.relics.qin.name,'伏羲琴');
+const roster=new Game();
+assert.equal(roster.state.players[0].hero,'jingwei');
+for(const hero of Object.keys(R.heroes)) assert.ok(roster.command(0,{kind:'hero',hero}).ok);
+for(const hero of ['fuxi','xuannv']) assert.ok(!roster.command(0,{kind:'hero',hero}).ok);
 for (const route of routes.flat()) assert.equal(route.total,routes[0][0].total);
 for (const path of paths.flat()) {
   assert.deepEqual(path[0],upper[0]);

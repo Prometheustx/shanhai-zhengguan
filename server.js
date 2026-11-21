@@ -13,6 +13,8 @@ const types={'index.html':'text/html; charset=utf-8','style.css':'text/css; char
   'assets/ink-valley.webp':'image/webp','assets/ink-combat.webp':'image/webp','assets/ink-ui.webp':'image/webp',
   'assets/ink-guardians.webp':'image/webp','assets/ink-relics.webp':'image/webp','assets/ink-spirits.webp':'image/webp',
   'assets/battle-weapons.webp':'image/webp','assets/guardians-cast.webp':'image/webp','assets/enemies-stride.webp':'image/webp',
+  'assets/refined-guardians.webp':'image/webp','assets/refined-guardians-cast.webp':'image/webp',
+  'assets/refined-guardians-faces.webp':'image/webp',
   'assets/ui-cloud.webp':'image/webp','assets/ui-tassel.webp':'image/webp'};
 const rooms=new Map();
 const newSeat=()=>({token:randomBytes(24).toString('hex'),stream:null,restart:false});

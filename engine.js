@@ -276,9 +276,9 @@
       if(!target) return;
       const relicProc=relic?.every && ++t.shots%relic.every===0;
       const phoenix=spirit?.burst && ++t.spiritShots%spirit.every===0;
-      const boost=localFields.reduce((mul,h)=>mul*(h.damage||1),1)*(relicProc?(relic.damage||1):1);
+      const boost=relicProc ? (relic.damage||1) : 1;
       const damage=spec.damage*lv.damage*boost;
-      const radius=spec.splash ? spec.splash+(spirit?.splash||0)+localFields.reduce((total,h)=>total+(h.splash||0),0) : 0;
+      const radius=spec.splash ? spec.splash+(spirit?.splash||0) : 0;
       t.cd=spec.interval;
       t.facing=target.x<pos.x?-1:1;
       this.effect('attack',pos,{slot:i,tx:target.x,ty:target.y,target:target.id,side:t.owner,type:t.type,radius,duration:spec.fxTime});
