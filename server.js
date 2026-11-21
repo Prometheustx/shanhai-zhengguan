@@ -15,6 +15,9 @@ const types={'index.html':'text/html; charset=utf-8','style.css':'text/css; char
   'assets/battle-weapons.webp':'image/webp','assets/guardians-cast.webp':'image/webp','assets/enemies-stride.webp':'image/webp',
   'assets/refined-guardians.webp':'image/webp','assets/refined-guardians-cast.webp':'image/webp',
   'assets/refined-guardians-faces.webp':'image/webp',
+  'assets/gorge-land.webp':'image/webp','assets/gorge-scenery.webp':'image/webp',
+  'assets/gorge-weapons.webp':'image/webp','assets/gorge-enemies.webp':'image/webp',
+  'assets/gorge-guardian-revisions.webp':'image/webp',
   'assets/ui-cloud.webp':'image/webp','assets/ui-tassel.webp':'image/webp'};
 const rooms=new Map();
 const newSeat=()=>({token:randomBytes(24).toString('hex'),stream:null,restart:false});

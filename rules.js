@@ -2,14 +2,18 @@
   "use strict";
   const W = 1040, H = 550, cx = W / 2;
   const mirror = ([x,y]) => [W-x,y];
-  const upper = [[cx,52],[cx,116],[500,132],[418,142],[375,153],[327,175],
-    [313,191],[326,204],[389,221],[429,244],[483,255],[510,267],[cx,279]];
-  const lower = [[cx,279],[cx,363],[508,385],[480,398],[400,420],[319,450],[252,473],[215,489],[188,502]];
+  // The upper routes cross sides at the first confluence, then meet again above the gorge.
+  const upper = [[cx,51],[cx,82],[514,91],[495,99],[463,105],[443,120],[438,134],
+    [445,149],[466,159],[491,165],[509,175],[cx,186],[cx,199],[527,212],
+    [551,219],[584,222],[626,220],[661,231],[686,251],[693,270],[682,288],
+    [653,299],[607,302],[569,303],[544,308],[527,319],[cx,329]];
+  const lower = [[cx,329],[cx,357],[510,370],[488,381],[457,389],[421,386],
+    [380,388],[344,396],[319,411],[302,434],[280,458],[245,482],[209,497],[175,504]];
   const paths = [upper, upper.map(mirror)].map(branch =>
     [lower,lower.map(mirror)].map(tail => branch.concat(tail.slice(1))));
-  const demonBoundary = 70;
-  const slots = [[469,94],[401,94],[477,183],[251,196],[421,284],[472,324],
-    [366,290],[222,381],[382,364],[372,481],[467,452],[266,422]].flatMap((p,i) =>
+  const demonBoundary = 62;
+  const slots = [[410,87],[342,101],[385,157],[303,178],[427,261],[253,234],
+    [282,286],[294,341],[429,345],[389,438],[426,485],[229,414]].flatMap((p,i) =>
     [p,mirror(p)].map(([x,y],side) => ({ id:i*2+side, x,y, side, label:(side ? '右' : '左') + (i+1) })));
   const config = {
     board:{W,H,upper,lower,paths,slots,gates:[lower.at(-1),mirror(lower.at(-1))],mirror,demonBoundary},
@@ -24,8 +28,8 @@
         role:'炼化灵气',desc:'战斗中每隔 7 秒炼化灵气。一至三阶每次分别获得 2、3、5 灵气。'},
       bow:{name:'逐日弓',glyph:'弓',color:'#ffcf60',damage:35,range:178,interval:1.27,fxTime:.51,
         role:'远程单体',desc:'射程最远，金箭优先射击离终点最近的妖物。'},
-      seal:{name:'五雷令',glyph:'令',color:'#64caff',damage:10,range:112,interval:2.85,fxTime:.73,
-        splash:46,splashRatio:1,stun:.85,role:'范围麻痹',desc:'天雷对范围内的妖物造成少量伤害，并使它们停步 0.85 秒。'},
+      seal:{name:'五雷令',glyph:'令',color:'#64caff',damage:10,range:112,interval:2.85,fxTime:.70,travel:.20,
+        splash:46,splashRatio:1,stun:.85,role:'范围麻痹',desc:'放出一道闪电。命中后雷纹扩散，使范围内的妖物受伤并停步 0.85 秒。'},
       spear:{name:'火尖枪',glyph:'枪',color:'#ff7256',damage:21,range:105,interval:1.26,fxTime:.54,
         burn:{damage:6,tick:.45,duration:1.8},role:'持续灼烧',desc:'刺击会点燃妖物，持续 1.8 秒。同一方再度命中会刷新灼烧。'},
       hammer:{name:'雷锤',glyph:'锤',color:'#ffd679',damage:41,range:95,interval:1.55,fxTime:.60,

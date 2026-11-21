@@ -5,7 +5,7 @@
   const mark=$('dragMark');
   const names=['左关','右关'];
   const iconGrids={
-    enemy:{ids:Object.keys(R.enemies),columns:4},
+    enemy:{ids:Object.keys(R.enemies),columns:5},
     relic:{ids:Object.keys(R.relics),columns:3},
     spirit:{ids:Object.keys(R.spirits),columns:5}
   };
@@ -50,9 +50,8 @@
     card.className='hero-card';
     card.dataset.hero=id;
     card.title=h.desc;
-    card.innerHTML='<span class="hero-visual" aria-hidden="true"><span class="hero-art"></span><span class="hero-face"></span></span><strong>'+h.name+'</strong><small>'+h.skill+'</small>';
-    BoardArt.guardianPortrait(card.querySelector('.hero-art'),id);
-    BoardArt.guardianPortrait(card.querySelector('.hero-face'),id,true);
+    card.innerHTML='<span class="hero-art" aria-hidden="true"></span><strong>'+h.name+'</strong><small>'+h.skill+'</small>';
+    BoardArt.guardianPortrait(card.firstElementChild,id);
     card.onclick=()=>{if(!confirming){chosenHero=id;lobbyError='';}};
     $('heroGrid').append(card);
     return card;
@@ -129,7 +128,7 @@
       '<p>妖物生命为原版同波的 '+wave.healthScale.toFixed(2)+' 倍。</p><ul>'+enemies+'</ul>');
   };
   $('help').onclick=()=>show('回龙谷 · 对战规则',
-    '<ol><li>北面的魔界裂隙涌出妖潮，裂隙外是前沿哨位。双方守关人在入场前确定，本地对局的右关由 NPC 操控。</li><li>商店单位免费取用，拖到空阵台召唤，或拖到同种一级塔上合成并夺取。刷新消耗灵气。</li><li>妖物脚下的箭头表示目标关口。击杀灵气归最后一击的塔主，妖物越透明，剩余生命越少。</li><li>首波可点就绪提前开战，也会在 20 秒后自动开始。后续各波自动开始。点击波次标题可查看妖物阵容和生命倍率。</li></ol>');
+    '<ol><li>妖潮从北面的魔界裂隙涌出，两次分流汇合，最后各自穿过南边的河谷关口。本地对局的右关由 NPC 操控。</li><li>商店单位免费取用，拖到空阵台召唤，或拖到同种一级塔上合成并夺取。刷新消耗灵气。</li><li>妖物脚下的箭头表示目标关口。击杀灵气归最后一击的塔主。受伤时显出裂纹，重伤时色泽变黯、动作变沉。</li><li>首波可点就绪提前开战，也会在 20 秒后自动开始。后续各波自动开始。点击波次标题可查看妖物阵容和生命倍率。</li></ol>');
   function reset(){
     clearDrag();
     game=new Engine.Game(undefined,{npc:true});s=game.state;side=0;picked=null;from=null;targeting=null;lastUI='';lastSlots='';
@@ -219,7 +218,7 @@
     if(action.kind==='skill') msg(names[actor]+'施放守关技。');
     if(action.kind==='relic') msg(names[actor]+'已装备'+R.relics[action.relic].name+'。');
     if(action.kind==='spirit') msg(R.spirits[action.spirit].name+'已为'+names[actor]+'助阵。');
-    if(action.kind==='ready') msg('双方就绪即开始下一波。');
+    if(action.kind==='ready') msg(session?'已切换就绪状态。':'妖潮已开始。');
     if(action.kind==='restart') msg('双方同意即重开。');
     return true;
   }

@@ -9,6 +9,10 @@ assert.equal(roster.state.players[0].hero,'jingwei');
 for(const hero of Object.keys(R.heroes)) assert.ok(roster.command(0,{kind:'hero',hero}).ok);
 for(const hero of ['fuxi','xuannv']) assert.ok(!roster.command(0,{kind:'hero',hero}).ok);
 for (const route of routes.flat()) assert.equal(route.total,routes[0][0].total);
+const northJunction=upper.findIndex((p,i)=>i>2 && p[0]===W/2);
+assert.ok(northJunction>2 && northJunction<upper.length-2);
+assert.ok(upper.slice(2,northJunction).every(([x])=>x<W/2));
+assert.ok(upper.slice(northJunction,-1).every(([x])=>x>=W/2));
 for (const path of paths.flat()) {
   assert.deepEqual(path[0],upper[0]);
   assert.deepEqual(path.slice(upper.length-1,upper.length+1),lower.slice(0,2));
@@ -224,10 +228,10 @@ assert.ok(Math.abs(controls.state.preparationLeft-(remaining-2))<.001);
 assert.ok(!controls.command(0,{kind:'speed',value:8}).ok);
 
 const tick=(game,frames)=>{for(let i=0;i<frames;i++) game.tick(1/60);};
-const fight=type=>{
+const fight=(type,slot=0)=>{
   const game=new Game(0);
   enter(game);
-  assert.ok(place(game,0,0,type).ok);
+  assert.ok(place(game,0,slot,type).ok);
   game.start();
   game.queue=[];
   return game;
@@ -256,17 +260,33 @@ assert.equal(short.hp,short.maxHp);
 assert.equal(far.hp,far.maxHp-R.towers.bow.damage);
 
 const thunder=fight('seal'), stunned=addEnemy(thunder,92,'taotie'), near=addEnemy(thunder,72), out=addEnemy(thunder,17);
+const flightFrames=Math.round(R.towers.seal.travel*60);
+tick(thunder,flightFrames);
+assert.equal(stunned.hp,stunned.maxHp);
+assert.equal(near.hp,near.maxHp);
+assert.equal(thunder.state.effects.find(f=>f.kind==='attack').target,stunned.id);
+assert.ok(!thunder.state.effects.some(f=>f.kind==='sealStrike'));
+const stopped=[stunned.distance,near.distance];
 tick(thunder,1);
+const strike=thunder.state.effects.find(f=>f.kind==='sealStrike');
+assert.ok(strike);
+assert.deepEqual([strike.x,strike.y],[stunned.x,stunned.y]);
+assert.deepEqual(strike.spread,[[near.x,near.y]]);
 assert.equal(near.hp,near.maxHp-R.towers.seal.damage);
 assert.ok(stunned.hp<stunned.maxHp);
 assert.equal(out.hp,out.maxHp);
-assert.equal(stunned.distance,92);
-assert.equal(near.distance,72);
 tick(thunder,40);
-assert.equal(stunned.distance,92);
-assert.equal(near.distance,72);
+assert.deepEqual([stunned.distance,near.distance],stopped);
 tick(thunder,16);
-assert.ok(stunned.distance>92 && near.distance>72);
+assert.ok(stunned.distance>stopped[0] && near.distance>stopped[1]);
+
+const sealAtGate=fight('seal',22), end=routes[0][0].total;
+const passed=addEnemy(sealAtGate,end-2), follower=addEnemy(sealAtGate,end-46);
+passed.hp=1;
+tick(sealAtGate,flightFrames+1);
+assert.equal(sealAtGate.state.players[0].hp,R.hp-1);
+assert.equal(sealAtGate.state.players[0].bounty,0);
+assert.equal(follower.hp,follower.maxHp-R.towers.seal.damage);
 
 const spear=fight('spear'), burning=addEnemy(spear,75,'ghost',1);
 burning.hp=R.towers.spear.damage+R.towers.spear.burn.damage*2-1;

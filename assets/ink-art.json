@@ -6,7 +6,7 @@
       "id": "ink-valley",
       "role": "地貌",
       "path": "assets/ink-valley.webp",
-      "status": "integrated",
+      "status": "archived",
       "tiles": [
         "魔界岩峰",
         "魔界裂隙",
@@ -81,7 +81,7 @@
       "id": "ink-combat",
       "role": "妖物与灵器",
       "path": "assets/ink-combat.webp",
-      "status": "integrated",
+      "status": "archived",
       "tiles": [
         "游魂",
         "山魈",
@@ -223,7 +223,7 @@
       "id": "battle-weapons",
       "role": "六件战斗灵器",
       "path": "assets/battle-weapons.webp",
-      "status": "integrated",
+      "status": "archived",
       "tiles": [
         "东皇钟",
         "神农鼎",
@@ -297,7 +297,7 @@
       "id": "enemies-stride",
       "role": "妖物行进关键帧",
       "path": "assets/enemies-stride.webp",
-      "status": "integrated",
+      "status": "archived",
       "tiles": [
         "游魂",
         "山魈",
@@ -469,6 +469,181 @@
         "reference": "八位守关人的双姿态原稿左半头肩区域。",
         "prompt_or_source_record": [
           "从 refined-guardians 的同一站姿原稿裁取头肩像，提示词见 refined-guardians。"
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "gorge-land",
+      "role": "回龙谷地表",
+      "path": "assets/gorge-land.webp",
+      "status": "integrated",
+      "tiles": [
+        "焦土至河谷"
+      ],
+      "technical": {
+        "dimensions": "1280x676",
+        "alpha": false,
+        "anchor": "canvas",
+        "frames": 1,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "精卫细描站姿用于画风参考，路面由程序另外绘制。",
+        "prompt_or_source_record": [
+          "A semitop-down unobstructed landscape underpainting for an original Chinese xianxia tower-defense game, wide landscape target about 2:1 aspect. Same refined Chinese xianxia 2D ink-and-cel painting as the character reference. Elegant fine tapered graphite-dark contours with confident silhouettes, restrained fine brush texture and believable soft light, rich mineral accents, shadows colored rather than heavy black bands. Fresh sage, jade, warm bone and slate with restrained cinnabar. No thick cartoon borders, toy-like plastic, overbusy highlights, 3D rendering, words, watermarks or UI. This is the bare valley floor, a softly detailed terrain plate on which actual combat paths and structures will be laid afterwards. Use a smooth atmospheric transition. Thin uppermost 14% smoky dark muted plum/smoky gray, middle dusty and damaged lavender slate/soot and light clay, lower ~58% soft jade green grassy valley and pale sage rock grain. Lower side rims can be a little darker jade. Highly diffuse just discernible hand-painted soil and wild grass patches, micro rocks, subtle weathered ink contours, faded sage washes. Keep all playable center x 15%–85% flat and open the entire height, including very soft fissures and flat bare stone patches at the northern quarter only. No trails or paths or yellow lines of any kind; no streams, water, hills, portals, props, trees, walls, characters, platforms, buildings, decals, towers, text, or border. The actual separate assets will create the terrain. Make the color and gentle seasonal changes nuanced and unified, not a simple digital gradient. Full bleed, opaque background."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "gorge-scenery",
+      "role": "回龙谷地物",
+      "path": "assets/gorge-scenery.webp",
+      "status": "integrated",
+      "tiles": [
+        "魔界岩峰",
+        "魔界裂隙",
+        "边境残垣",
+        "青绿岩山",
+        "松树",
+        "瀑布"
+      ],
+      "technical": {
+        "dimensions": "672x448",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "八位守关人的细线、分色与光照；原地图仅用于两界过渡参考。",
+        "prompt_or_source_record": [
+          "Tile atlas for a new Shan Hai Zheng Guan jade gorge battlefield matching the first reference's refined ink line. Same refined Chinese xianxia 2D ink-and-cel painting as the character reference. Elegant fine tapered graphite-dark contours with confident silhouettes, restrained fine brush texture and believable soft light, rich mineral accents, shadows colored rather than heavy black bands. Fresh sage, jade, warm bone and slate with restrained cinnabar. No thick cartoon borders, toy-like plastic, overbusy highlights, 3D rendering, words, watermarks or UI. EXACTLY 3 columns by 2 rows of six individually separated terrain sprites, no visual grid, all true transparent PNG. Semitop-down slight side view for game compositing, broad natural color planes with thin edge lines and precise aging. TOP LEFT a small rake of broken violet-slate mountain peaks with narrow mineral pink fissures, low drifting smoke within the footprint, no ground plane. TOP MIDDLE a muted purple spiritual rift in a fine layered circular frame of broken floating dark stones, soft lavender spiral inside, no oversized rings outside. TOP RIGHT a pile of crumbled pale masonry and three lit ragged ochre-gray garrison columns plus a small hanging weathered rust banner. BOTTOM LEFT a broad irregular jade and gray green cliff rock shoulder with switchback mineral planes and tiny wild grass, no forest on top. BOTTOM MIDDLE an elegant asymmetrical windswept pine rising from low moss and gravel, vivid sage greens with individually clustered needles and tree roots. BOTTOM RIGHT a layered stream waterfall curving over washed blue-slate and jade rock shelf into a narrow pale turquoise pebble pool. Game assets separate, consistent sun from top left, no overlap each equal cell, no gameplay pads and roads, no people, no faked background."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "gorge-weapons",
+      "role": "六件防守灵器",
+      "path": "assets/gorge-weapons.webp",
+      "status": "integrated",
+      "tiles": [
+        "东皇钟",
+        "神农鼎",
+        "逐日弓",
+        "五雷令",
+        "火尖枪",
+        "雷锤"
+      ],
+      "technical": {
+        "dimensions": "576x384",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "保留上一版六件武器的识别色与轮廓，线条与守关人统一。",
+        "prompt_or_source_record": [
+          "Redraw the exact six defense units from the first reference as hand-painted equipment of the same world as the second reference. Same refined Chinese xianxia 2D ink-and-cel painting as the character reference. Elegant fine tapered graphite-dark contours with confident silhouettes, restrained fine brush texture and believable soft light, rich mineral accents, shadows colored rather than heavy black bands. Fresh sage, jade, warm bone and slate with restrained cinnabar. No thick cartoon borders, toy-like plastic, overbusy highlights, 3D rendering, words, watermarks or UI. Exactly 3 columns × 2 rows, one isolated intact model per square cell, all true transparent, ample clear margins. Same three-quarter slight game view, subtle intricate ornament details, luminescent accents small and controlled, legible miniature at 55px, grounded without platform shadow. Top left Donghuang Bell, aged ink-green bronze temple bell, restrained gold sun carving, mint rim; top middle Shennong Cauldron, purple amethyst-celadon tripod medicinal cauldron, twin handles and tiny herbs, soft lilac breath; top right Zhuri Bow, golden slim recurved sun bow on a discreet stand, taut thin string not thick toy. Bottom left Five-Thunder Seal, dark cobalt jade tall command tablet with thin etched lightning motif and cyan faceted edges, tiny carved base, no bolt or blast drawn around it. Bottom middle Fire-Tipped Spear, slim red shaft and red/orange spear blade with a restrained hint of ember at point, a tiny tail brace. Bottom right Thunder Hammer, angular jade/blue and charcoal heavy hammer with small gold engraving and a wrapped brown grip, grounded quiet pose. Preserve exact colors and placement order, confident fine dark outline, small pale highlights rather than thick black piles, nothing else."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "gorge-enemies",
+      "role": "妖物站姿与行进帧",
+      "path": "assets/gorge-enemies.webp",
+      "status": "integrated",
+      "tiles": [
+        "游魂",
+        "山魈",
+        "甲妖",
+        "蚀月妖将",
+        "饕餮",
+        "游魂·行进",
+        "山魈·行进",
+        "甲妖·行进",
+        "蚀月妖将·行进",
+        "饕餮·行进"
+      ],
+      "technical": {
+        "dimensions": "800x320",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 2,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "保持原有五类妖物的体型、色彩及饕餮身上的巨口。",
+        "prompt_or_source_record": [
+          "Redesign five game enemies faithfully from the first reference with the same brush and line weight as the second figure reference. Same refined Chinese xianxia 2D ink-and-cel painting as the character reference. Elegant fine tapered graphite-dark contours with confident silhouettes, restrained fine brush texture and believable soft light, rich mineral accents, shadows colored rather than heavy black bands. Fresh sage, jade, warm bone and slate with restrained cinnabar. No thick cartoon borders, toy-like plastic, overbusy highlights, 3D rendering, words, watermarks or UI. EXACTLY FIVE evenly spaced columns by TWO rows on genuine transparent RGBA, ten distinct separated cutouts with generous transparent gutters. Top row is each character in chambered natural advance pose; bottom row same character one stride further, identical appearance and scale, each facing RIGHT. Left-to-right BOTH rows: 1. blue jade one-eye flowing spirit with a cool teal smoke-body and cyan inner lines; 2. strong mountain mandrill demon with rusty sienna and gold mane, dark claws and pale muzzle; 3. plated demonic biped with aged garnet/plum lightly glowing carapace shoulders and two flared horns; 4. lunar masked warlord with long silver lavender hair, dark embroidered armor and two small purple moon blades; 5. Taotie heavy low quadruped, cinnabar bronze mask-like horns, huge ceremonial geometric maw, amber eyes and plum tail plume. Keep their old silhouettes recognizable, less oversized cartoon forms and more deliberate anatomy, crisp fine borders, soft narrow colored edges, no dark fog or blood, no dropshadow or scenery. Bottom row should genuinely show moving arms, legs, blades or tails as an alternate frame. Each column entirely within its cell; no text or repeating extras."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "gorge-guardian-revisions",
+      "role": "精卫与夸父比例重绘",
+      "path": "assets/gorge-guardian-revisions.webp",
+      "status": "integrated",
+      "tiles": [
+        "精卫·站姿",
+        "夸父·站姿",
+        "精卫·施法",
+        "夸父·施法",
+        "精卫·状态栏",
+        "夸父·状态栏"
+      ],
+      "technical": {
+        "dimensions": "512x768",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 2,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "以先前同角色的服装和道具作参考。状态栏头像由同一张新站姿裁取。",
+        "prompt_or_source_record": [
+          "Deliver a landscape transparent RGBA atlas of exactly two widely separated full figures of the same character. Left idle and right action, both three-quarter facing right, matching age, anatomy, face and clothing between poses. Entire figure intact head to feet on the same foot baseline, centered in each half with a wide transparent gutter. Transparent padding, no ground or drop shadow, no effects crossing into center. Same refined Chinese xianxia 2D ink-and-cel painting as the character reference. Elegant fine tapered graphite-dark contours with confident silhouettes, restrained fine brush texture and believable soft light, rich mineral accents, shadows colored rather than heavy black bands. Fresh sage, jade, warm bone and slate with restrained cinnabar. No thick cartoon borders, toy-like plastic, overbusy highlights, 3D rendering, words, watermarks or UI. Rewrite the reference silhouette of mythical bird-spirit Jingwei as a clearly child-aged young girl with authentic child anatomy, about 4.9 heads tall from hairline to bare foot, noticeably proportionally larger ROUND head with short, lightly wide cheeks and small chin, round joyful alert eyes, flat child torso, very narrow shoulders, short upper/lower arms and short calves and thighs, little boots and hands. Rebuild her anatomy, never shrink the adult figure. Completely modest age-appropriate outfit, fully closed ivory wrap-neck flying tunic with long rounded sleeves and red bindings, hem about knee length over solid charcoal ankle-length trousers, red white soft flat boots, no exposed chest, bare legs or body-fitting adult armor. Keep signature scarlet feather crest at dark updo with short swinging tail of hair, jade-teal and scarlet small wings, cream and red color blocks, fine red fluttering ribbon tied at belt. Left stands naturally with both arms down, toes flat, short wings folded. Right clearly same young girl tosses a tiny pebble to right with one hand, tiny knees flexed and one wing slightly unfolds. Playful, dignified and natural game character, not an oversized-head parody. Let round head and child limbs be unmistakable at thumbnail size.",
+          "Deliver a landscape transparent RGBA atlas of exactly two widely separated full figures of the same character. Left idle and right action, both three-quarter facing right, matching age, anatomy, face and clothing between poses. Entire figure intact head to feet on the same foot baseline, centered in each half with a wide transparent gutter. Transparent padding, no ground or drop shadow, no effects crossing into center. Same refined Chinese xianxia 2D ink-and-cel painting as the character reference. Elegant fine tapered graphite-dark contours with confident silhouettes, restrained fine brush texture and believable soft light, rich mineral accents, shadows colored rather than heavy black bands. Fresh sage, jade, warm bone and slate with restrained cinnabar. No thick cartoon borders, toy-like plastic, overbusy highlights, 3D rendering, words, watermarks or UI. Rebuild adult Kuafu as a mythic heavyweight outdoors strongman, far wider in bone and muscle rather than enlarging the old proportions. Study a compact 6.5–7 head heroic strongman, shoulders physically 3.6 face widths, massive trapezius into a short thick neck, very broad rib cage and deep wide chest, solid thick waist with a braced abdomen, large heavy hands, forearms as thick as shin, thick calves and powerful weight-bearing thighs. Show muscle weight and skin planes through existing ochre open-front robe that exposes part of broad chest and upper arms. Broader stubbled square chin and dense eyebrows, sun-browned, rugged and kind. Keep red banner headband, ochre and gold trim, low tied black hair, jade ring and thick knotted peachwood staff. Left nearly frontal three-quarter grounding, legs widely planted, one hand upright staff near forearm, both shoulders visible. Right bends knees and drives the staff down with both hands, chest and massive upper back drive pose, arms show mass. Do not make a slender heroic athlete, no swollen superhero balloon anatomy, keep heavy deliberate shapes."
         ]
       },
       "verification": {

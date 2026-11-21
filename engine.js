@@ -39,7 +39,7 @@
         this.state.players[1].hero='houyi';
         this.state.players[1].heroConfirmed=true;
       }
-      this.queue=[]; this.spawnIn=0; this.seq=0; this.step=openingSide;this.openingSide=openingSide;
+      this.queue=[]; this.inFlight=[]; this.spawnIn=0; this.seq=0; this.step=openingSide;this.openingSide=openingSide;
       const opening=this.rollShop();
       for(const p of this.state.players) p.shop=opening.slice();
     }
@@ -214,6 +214,7 @@
     start() {
       const s=this.state;
       s.wave++;s.phase='battle';s.preparationLeft=null;
+      this.inFlight.length=0;
       for(const p of s.players) {p.ready=false;p.spiritUsed=false;}
       const wave=R.waves[s.wave-1];
       this.queue=wave.groups.flatMap(([type,n],group)=>{
@@ -277,37 +278,50 @@
       const relicProc=relic?.every && ++t.shots%relic.every===0;
       const phoenix=spirit?.burst && ++t.spiritShots%spirit.every===0;
       const boost=relicProc ? (relic.damage||1) : 1;
-      const damage=spec.damage*lv.damage*boost;
+      const power=lv.damage*boost;
       const radius=spec.splash ? spec.splash+(spirit?.splash||0) : 0;
       t.cd=spec.interval;
       t.facing=target.x<pos.x?-1:1;
-      this.effect('attack',pos,{slot:i,tx:target.x,ty:target.y,target:target.id,side:t.owner,type:t.type,radius,duration:spec.fxTime});
-      if(relicProc && relic.shred) target.shredUntil=s.time+relic.duration;
-      if(relic?.slow && target.type==='spirit' && !((target.qinSides||0)&(1<<t.owner))) {
-        target.qinSides=(target.qinSides||0)|(1<<t.owner);
-        target.qinUntil=s.time+relic.duration;
-      }
-      this.hit(target,damage,t.owner,relic,spirit,fields);
-      if(spec.stun && target.hp>0) target.stunUntil=Math.max(target.stunUntil||0,s.time+spec.stun);
-      if(spec.burn && target.hp>0) {
-        target.burns??=[null,null];
-        const previous=target.burns[t.owner];
-        target.burns[t.owner]={
-          damage:spec.burn.damage*lv.damage*boost, interval:spec.burn.tick,
-          next:previous?.next??s.time+spec.burn.tick, until:s.time+spec.burn.duration,
-          bonus:relic?.bonus||0, spirit:spirit ? owner.spirit.kind : null
-        };
+      this.effect('attack',pos,{slot:i,tx:target.x,ty:target.y,target:target.id,side:t.owner,type:t.type,radius,duration:spec.travel||spec.fxTime});
+      const strike={target,pos,type:t.type,side:t.owner,power,radius,relic,relicProc,phoenix,spirit,spiritKind:owner.spirit?.kind};
+      if(spec.travel) this.inFlight.push({...strike,when:s.time+spec.travel});
+      else this.impact(strike,fields);
+    }
+
+    impact(strike,fields) {
+      const s=this.state;
+      const {target,pos,type,side,power,radius,relic,relicProc,phoenix,spirit,spiritKind}=strike;
+      const spec=R.towers[type], damage=spec.damage*power, spread=[];
+      if(!spec.travel || s.enemies.includes(target)) {
+        if(relicProc && relic.shred) target.shredUntil=s.time+relic.duration;
+        if(relic?.slow && target.type==='spirit' && !((target.qinSides||0)&(1<<side))) {
+          target.qinSides=(target.qinSides||0)|(1<<side);
+          target.qinUntil=s.time+relic.duration;
+        }
+        this.hit(target,damage,side,relic,spirit,fields);
+        if(spec.stun && target.hp>0) target.stunUntil=Math.max(target.stunUntil||0,s.time+spec.stun);
+        if(spec.burn && target.hp>0) {
+          target.burns??=[null,null];
+          const previous=target.burns[side];
+          target.burns[side]={
+            damage:spec.burn.damage*power, interval:spec.burn.tick,
+            next:previous?.next??s.time+spec.burn.tick, until:s.time+spec.burn.duration,
+            bonus:relic?.bonus||0, spirit:spirit ? spiritKind : null
+          };
+        }
       }
       if(!radius && !phoenix) return;
-      if(phoenix) this.effect('burst',target,{side:t.owner,radius:spirit.burst,type:'phoenix'});
+      if(phoenix) this.effect('burst',target,{side,radius:spirit.burst,type:'phoenix'});
       for(const e of s.enemies) {
         if(e===target || e.hp<=0) continue;
         const distance=sq(e,target);
         const inRange=radius>0 && distance<=radius**2;
         const extra=(inRange?spec.splashRatio:0)+(phoenix&&distance<=spirit.burst**2?spirit.ratio:0);
-        if(extra>0) this.hit(e,damage*extra,t.owner,relic,spirit,fields);
+        if(extra>0) this.hit(e,damage*extra,side,relic,spirit,fields);
+        if(spec.travel && inRange) spread.push([e.x,e.y]);
         if(spec.stun && inRange && e.hp>0) e.stunUntil=Math.max(e.stunUntil||0,s.time+spec.stun);
       }
+      if(spec.travel) this.effect('sealStrike',target,{side,radius,spread,fromX:pos.x,fromY:pos.y,duration:spec.fxTime});
     }
 
     updateBurns(fields,initiative) {
@@ -350,6 +364,12 @@
       }
       const fields=s.effects.filter(f=>f.kind==='field');
       const step=this.step++;
+      const delayed=this.inFlight;
+      this.inFlight=[];
+      for(const strike of delayed) {
+        if(strike.when<=s.time+1e-8) this.impact(strike,fields);
+        else this.inFlight.push(strike);
+      }
       // Alternate initiative and traversal across the mirrored board.
       for(let k=0;k<s.towers.length;k++) {
         const i=(step&1) ? s.towers.length-1-k : k;
