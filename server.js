@@ -6,12 +6,13 @@ const {randomBytes,randomInt}=require('node:crypto');
 const {Game}=require('./engine');
 const types={'index.html':'text/html; charset=utf-8','style.css':'text/css; charset=utf-8','ui-jade.css':'text/css; charset=utf-8',
   'rules.js':'text/javascript; charset=utf-8','engine.js':'text/javascript; charset=utf-8',
-  'app.js':'text/javascript; charset=utf-8','map.js':'text/javascript; charset=utf-8',
+  'app.js':'text/javascript; charset=utf-8','map.js':'text/javascript; charset=utf-8','battle-effects.js':'text/javascript; charset=utf-8',
   'assets/huilong-open.webp':'image/webp','assets/nuwa-field.webp':'image/webp',
   'assets/guardians-field.webp':'image/webp','assets/jingwei-guard.webp':'image/webp',
   'assets/shop-items.webp':'image/webp',
   'assets/ink-valley.webp':'image/webp','assets/ink-combat.webp':'image/webp','assets/ink-ui.webp':'image/webp',
   'assets/ink-guardians.webp':'image/webp','assets/ink-relics.webp':'image/webp','assets/ink-spirits.webp':'image/webp',
+  'assets/battle-weapons.webp':'image/webp','assets/guardians-cast.webp':'image/webp','assets/enemies-stride.webp':'image/webp',
   'assets/ui-cloud.webp':'image/webp','assets/ui-tassel.webp':'image/webp'};
 const rooms=new Map();
 const newSeat=()=>({token:randomBytes(24).toString('hex'),stream:null,restart:false});

@@ -218,6 +218,114 @@
         "native_scale_reviewed": true,
         "in_engine_reviewed": true
       }
+    },
+    {
+      "id": "battle-weapons",
+      "role": "六件战斗灵器",
+      "path": "assets/battle-weapons.webp",
+      "status": "integrated",
+      "tiles": [
+        "东皇钟",
+        "神农鼎",
+        "逐日弓",
+        "五雷令",
+        "火尖枪",
+        "雷锤"
+      ],
+      "technical": {
+        "dimensions": "576x384",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 1,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "assets/ink-combat.webp 原图用于形象和画风参考。",
+        "prompt_or_source_record": [
+          "A BRAND NEW game weapon atlas. Exactly THREE columns by TWO rows of separate sprites, six items in the following position order. Production assets for the same Chinese myth tower defense game as the reference. Genuine transparent RGBA canvas, isolated intact sprites, charcoal-black outer ink line, crisp saturated cel-shading, three-quarter game view facing to the RIGHT with a slightly overhead camera, bottom-center foot anchor, clean even edge alpha, ample gutters, equal-sized cells. No names, words, framing, board, opaque backgrounds, grid lines, or ground shadows. Match the reference game art at icon sizes. The reference is for visual style only, all six props must be the following new designs. First row left: the Donghuang Bell, a substantial dark jade-green Chinese bronze bell with a strong rounded shoulder, cream-gold relief sun symbol and jade-cyan ringing rim, open base, floating slightly, no red tassel. First row middle: the Shennong Cauldron, PURPLE, clear royal amethyst round ancient Chinese herb tripod cauldron with twin curled handles, lavender crystal inlays and rising pale violet qi, small decorative sprout and lid, never orange. First row right: the Golden Sun-Chasing Bow, GOLD predominantly, elegant recognizable long Chinese golden recurve HAND BOW on a very compact gold stand, visible string and one ready sun-gold arrow, no crossbow mechanism. Second row left: the Five Thunders Command Talisman, BLUE, an upright bright ultramarine and cobalt rectangular jade talisman with stroke-like electric cyan zigzag and stylized gold borders, five small blue facets and a small cloud base, no lettering. Second row middle: the Fire-tipped Spear, VIVID CINNABAR RED, elegant long red-shaft mounted Chinese spear slanted upward to right with a sharp coral and hot red blade, minimal stylized flames confined near blade, no character. Second row right: the Thunder Hammer of Leigong and Dianmu, a stocky angled thunder hammer with large recognizable faceted turquoise-green and dark slate rectangular head and bright yellow lightning motif, single short orange grip in a tiny footing, unmistakably a hammer. All weapons distinct medium size and visible at game scale, no extra items. Exact positions with clear margins, genuine alpha."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "guardians-cast",
+      "role": "守关人施法关键帧",
+      "path": "assets/guardians-cast.webp",
+      "status": "integrated",
+      "tiles": [
+        "精卫",
+        "后羿",
+        "女娲",
+        "夸父",
+        "伏羲",
+        "神农",
+        "大禹",
+        "雷公",
+        "常羲",
+        "九天玄女"
+      ],
+      "technical": {
+        "dimensions": "1120x448",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 2,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "assets/ink-guardians.webp 原图用于形象和画风参考。",
+        "prompt_or_source_record": [
+          "Generate a new action-keyframe atlas for the TEN playable guardians in the reference atlas, with EXACTLY FIVE columns and TWO rows in the precise same order. Production assets for the same Chinese myth tower defense game as the reference. Genuine transparent RGBA canvas, isolated intact sprites, charcoal-black outer ink line, crisp saturated cel-shading, three-quarter game view facing to the RIGHT with a slightly overhead camera, bottom-center foot anchor, clean even edge alpha, ample gutters, equal-sized cells. No names, words, framing, board, opaque backgrounds, grid lines, or ground shadows. Match the reference game art at icon sizes. Keep each character's existing adult face, body proportion, gold-trimmed costume, accessory colors, hair, and all identifying parts. The reference shows idle standing. Draw a NEW visually distinct full-body action figure for each same character, keep outline and clean right-facing silhouettes, and align the left and right foot area near cell baseline. Upper row left to right: Jingwei in the existing white/crimson clothes and red/teal wings, unfurls her wings a little and throws a fist-sized pebble toward right; Hou Yi in the existing blue/cream and gold, draws the gold bow fully back to shoot right; Nuwa with the same blue-gold hair crown, ivory and jade robe, clearly visible flowing slender green serpent tail INSTEAD OF LEGS, lifts both hands with a small five-color stone between them, serene nurturing expression, no children; Kuafu in existing bright ochre and red with dark pants plants peachwood staff forward, leans to drive it down; Fuxi with the same blue clothing, gold bagua disk and turquoise serpent tail INSTEAD OF LEGS, turns the bagua disk forward with extended arm, other hand makes spell sign. Lower row left to right: Shennong with moss-orange herb pouch and antler leaves in green clothes, sweeps one hand and sprouts leaves; Dayu in blue/ivory dips flood spade forward, face visible; Leigong in deep violet with folded slate wings and large gold hammer lifts the hammer to swing; Changxi dressed in existing moon-blue robes and crescent hairpin opens moon fan overhead with trailing fabric; Jiutian Xuannü in crimson/ivory arms armor extends spear forward in low lunge, plume still visible. Keep actors alone with no giant magic VFX. Each cell must contain its own separated single character and one clear casting gesture. One asset per cell, never mix or swap identities."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
+    },
+    {
+      "id": "enemies-stride",
+      "role": "妖物行进关键帧",
+      "path": "assets/enemies-stride.webp",
+      "status": "integrated",
+      "tiles": [
+        "游魂",
+        "山魈",
+        "甲妖",
+        "蚀月妖将",
+        "饕餮"
+      ],
+      "technical": {
+        "dimensions": "480x320",
+        "alpha": true,
+        "anchor": "bottom-center",
+        "frames": 2,
+        "filtering": "linear"
+      },
+      "source": {
+        "kind": "generated",
+        "url_or_tool": "OpenAI ImageGen (built-in)",
+        "license": "随项目发布。当前仓库未为这些美术素材单列许可。",
+        "reference": "assets/ink-combat.webp 原图用于形象和画风参考。",
+        "prompt_or_source_record": [
+          "Create a companion monster walking keyframe atlas for the five existing monsters in the reference. EXACTLY THREE columns and TWO rows, bottom right cell empty. Production assets for the same Chinese myth tower defense game as the reference. Genuine transparent RGBA canvas, isolated intact sprites, charcoal-black outer ink line, crisp saturated cel-shading, three-quarter game view facing to the RIGHT with a slightly overhead camera, bottom-center foot anchor, clean even edge alpha, ample gutters, equal-sized cells. No names, words, framing, board, opaque backgrounds, grid lines, or ground shadows. Match the reference game art at icon sizes. Match existing exact monsters in the first five cells, ignore the weapon assets. Change limb pose for an alternate walk or charge frame, preserving markings and proportions, no redraw of the color schemes. First row left to right: existing glowing navy and cyan single-eye ghost with a newly stretched S-shape streaming tail and claws extended; same orange shaggy Shankui ape with its near foreleg lifted, far paw on ground running, orange mane and cream eyebrows; same deep plum and red armored demon with one leg stepping out and torso leaning, beetle shoulder horn. Second row left to right: same lavender-haired masked crescent blade demon general in stride, opposite leg forward and one violet crescent blade low; same vermilion Taotie low horned beast, belly maw with carved square teeth and purple highlights, right paws lifted mid-stomp. Last cell is wholly transparent. Same facing direction as reference. No stage, no shadow, no text, no props apart from monster equipment. Separate figures with generous true transparent padding."
+        ]
+      },
+      "verification": {
+        "technical_checks_passed": true,
+        "native_scale_reviewed": true,
+        "in_engine_reviewed": true
+      }
     }
   ]
 }

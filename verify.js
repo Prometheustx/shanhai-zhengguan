@@ -40,7 +40,7 @@ for(let i=0;i<R.waves.length;i++){
   }
 }
 const enter=g=>{for(const side of [0,1]) assert.ok(g.command(side,{kind:'confirmHero'}).ok);};
-const place=(g,side,to,type='sword')=>{
+const place=(g,side,to,type='bow')=>{
   const p=g.state.players[side];
   p.shop[0]=type;
   return g.command(side,{kind:'place',to,card:0,revision:p.shopRevision});
@@ -53,7 +53,7 @@ assert.ok(place(shared,0,1).ok);
 assert.equal(shared.state.towers[1].owner,0);
 assert.ok(place(shared,1,0).ok);
 assert.equal(shared.state.towers[0].owner,1);
-assert.ok(!place(shared,1,1,'thunder').ok);
+assert.ok(!place(shared,1,1,'hammer').ok);
 shared.state.wave=2;
 assert.ok(shared.command(0,{kind:'spirit',spirit:'qilin',to:1}).ok);
 assert.ok(!g.command(0,{kind:'place',to:0,card:5,revision:0}).ok);
@@ -118,7 +118,7 @@ function mirroredMatch(openingSide){
     for (const side of [0,1]){
       for (const [i,n] of layout.entries()){
         const slot=n*2+side;
-        if (!g.state.towers[slot] && !place(g,side,slot,['sword','thunder','sword','frost','thunder'][i%5]).ok) break;
+        if (!g.state.towers[slot] && !place(g,side,slot,['bow','seal','bell','spear','hammer','cauldron'][i%6]).ok) break;
       }
       if(wave>=2) {
         for(const n of layout) {
@@ -168,17 +168,31 @@ assert.ok(npc.command(0,{kind:'confirmHero'}).ok);
 for(let i=0;i<1200;i++) npc.tick(1/60);
 assert.equal(npc.state.phase,'battle');
 assert.ok(npc.state.towers.some(t=>t?.owner===1));
+assert.ok(npc.state.towers.every((t,i)=>t?.owner!==1 || slots[i].side===1));
+const npcTactics=new Game(0,{npc:true});
+assert.ok(npcTactics.command(0,{kind:'confirmHero'}).ok);
+assert.ok(place(npcTactics,0,22,'hammer').ok);
+npcTactics.state.players[1].shop=['cauldron','hammer',null,null];
+assert.ok(!npcTactics.command(1,{kind:'place',card:1,revision:0,to:22},true).ok);
+npcTactics.playNpc();
+assert.equal(npcTactics.state.towers[22].owner,0);
+const rightHammer=npcTactics.state.towers.findIndex(t=>t?.owner===1);
+assert.ok(rightHammer>=0 && slots[rightHammer].side===1);
+assert.equal(npcTactics.state.towers[rightHammer].type,'hammer');
+assert.ok(!npcTactics.command(1,{kind:'merge',from:rightHammer,to:22},true).ok);
+const spare=slots.find(p=>p.side===1 && !npcTactics.state.towers[p.id]);
+assert.ok(place(npcTactics,0,spare.id,'bell').ok);
 const shopMerge=new Game(0);enter(shopMerge);
-shopMerge.state.players[0].shop=['sword','sword','thunder','frost'];
+shopMerge.state.players[0].shop=['bow','bow','hammer','spear'];
 assert.ok(shopMerge.command(0,{kind:'place',card:0,to:0,revision:0}).ok);
 const result=shopMerge.command(0,{kind:'place',card:1,to:0,revision:0});
 assert.ok(result.ok && result.merged);
 assert.equal(shopMerge.state.towers[0].level,2);
 assert.equal(shopMerge.state.players[0].shop[1],null);
 const shopSteal=new Game(0);enter(shopSteal);
-shopSteal.state.players[1].shop[0]='sword';
+shopSteal.state.players[1].shop[0]='bow';
 assert.ok(shopSteal.command(1,{kind:'place',card:0,to:3,revision:0}).ok);
-shopSteal.state.players[0].shop[0]='sword';
+shopSteal.state.players[0].shop[0]='bow';
 assert.ok(shopSteal.command(0,{kind:'place',card:0,to:3,revision:0}).stolen);
 assert.equal(shopSteal.state.towers[3].owner,0);
 assert.equal(shopSteal.state.towers[3].level,2);
@@ -202,4 +216,79 @@ assert.ok(controls.command(0,{kind:'pause'}).ok);
 for(let i=0;i<60;i++) controls.tick(1/60);
 assert.ok(Math.abs(controls.state.preparationLeft-(remaining-2))<.001);
 assert.ok(!controls.command(0,{kind:'speed',value:8}).ok);
-console.log('通过：六波生命阶梯、四路等长、镜像分怪、合成、击杀、神器、漏怪、守关技和整局镜像');
+
+const tick=(game,frames)=>{for(let i=0;i<frames;i++) game.tick(1/60);};
+const fight=type=>{
+  const game=new Game(0);
+  enter(game);
+  assert.ok(place(game,0,0,type).ok);
+  game.start();
+  game.queue=[];
+  return game;
+};
+function addEnemy(game,distance,type='ghost',gate=0) {
+  game.spawn({type,branch:0,gate});
+  const enemy=game.state.enemies.at(-1);
+  enemy.distance=distance;
+  Object.assign(enemy,at(enemy.branch,gate,distance));
+  return enemy;
+}
+const bell=fight('bell'), echo=addEnemy(bell,80), behind=addEnemy(bell,67);
+tick(bell,1);
+assert.equal(echo.hp,echo.maxHp-R.towers.bell.damage);
+assert.equal(behind.hp,behind.maxHp);
+assert.equal(bell.state.towers[0].cd,R.towers.bell.interval);
+assert.equal(bell.state.effects.find(f=>f.kind==='attack').type,'bell');
+tick(bell,25);
+assert.equal(echo.hp,echo.maxHp-R.towers.bell.damage);
+
+const bow=fight('bow'), short=addEnemy(bow,80), far=addEnemy(bow,218,'ghost',1);
+const farDistance=Math.hypot(far.x-slots[0].x,far.y-slots[0].y);
+assert.ok(farDistance>R.towers.bell.range && farDistance<=R.towers.bow.range);
+tick(bow,1);
+assert.equal(short.hp,short.maxHp);
+assert.equal(far.hp,far.maxHp-R.towers.bow.damage);
+
+const thunder=fight('seal'), stunned=addEnemy(thunder,92,'taotie'), near=addEnemy(thunder,72), out=addEnemy(thunder,17);
+tick(thunder,1);
+assert.equal(near.hp,near.maxHp-R.towers.seal.damage);
+assert.ok(stunned.hp<stunned.maxHp);
+assert.equal(out.hp,out.maxHp);
+assert.equal(stunned.distance,92);
+assert.equal(near.distance,72);
+tick(thunder,40);
+assert.equal(stunned.distance,92);
+assert.equal(near.distance,72);
+tick(thunder,16);
+assert.ok(stunned.distance>92 && near.distance>72);
+
+const spear=fight('spear'), burning=addEnemy(spear,75,'ghost',1);
+burning.hp=R.towers.spear.damage+R.towers.spear.burn.damage*2-1;
+tick(spear,1);
+assert.ok(burning.burns[0] && burning.hp>0);
+tick(spear,27);
+assert.equal(burning.hp,R.towers.spear.burn.damage-1);
+tick(spear,27);
+assert.ok(burning.hp<=0);
+assert.equal(spear.state.players[0].bounty,R.enemies.ghost.reward);
+assert.equal(spear.state.players[1].bounty,0);
+
+const hammer=fight('hammer'), heavy=addEnemy(hammer,83), nearby=addEnemy(hammer,69);
+tick(hammer,1);
+assert.equal(heavy.hp,heavy.maxHp-R.towers.hammer.damage);
+assert.ok(Math.abs((nearby.maxHp-nearby.hp)-R.towers.hammer.damage*R.towers.hammer.splashRatio)<1e-7);
+
+const urn=new Game(0);
+enter(urn);
+assert.ok(place(urn,0,0,'cauldron').ok && place(urn,0,0,'cauldron').merged);
+tick(urn,420);
+assert.equal(urn.state.players[0].gold,R.gold);
+urn.start();
+tick(urn,419);
+assert.equal(urn.state.players[0].gold,R.gold);
+tick(urn,1);
+assert.equal(urn.state.players[0].gold,R.gold+R.levels[2].qi);
+assert.equal(urn.state.players[0].bounty,0);
+assert.ok(urn.state.effects.some(f=>f.kind==='harvest' && f.side===0));
+assert.ok(urn.state.enemies.every(e=>e.hp===e.maxHp));
+console.log('通过：六件灵器、麻痹停步、灼烧归属、产气阶次、NPC 右侧布防、四路对称、合成、胜负及联机控制规则');

@@ -19,6 +19,14 @@
   const sq=(a,b)=>(a.x-b.x)**2+(a.y-b.y)**2;
   const fail=error=>({ok:false,error});
   const has=(set,key)=>typeof key==='string' && Object.hasOwn(set,key);
+  const rightPads=R.board.slots.filter(pos=>pos.side===1);
+  const rightLane=routes.flatMap((branch,i)=>{
+    const span=branch[1].total;
+    return Array.from({length:Math.floor(span/18)},(_,n)=>{
+      const distance=(n+.5)*18;
+      return {...at(i,1,distance),progress:distance/span};
+    });
+  });
   const player=()=>({gold:R.gold,hp:R.hp,kills:0,bounty:0,steals:0,hero:R.defaultHero,heroConfirmed:false,shop:[],shopRevision:0,refreshCount:0,cooldown:0,
     buff:0,shield:0,shieldUntil:0,relic:null,spirit:null,spiritUsed:false,ready:false});
   class Game {
@@ -85,6 +93,7 @@
       if (a.kind==='place') {
         const pos=slot(a.to);
         if (!pos) return fail('请选择地图上的空阵位。');
+        if (this.npc && side===1 && pos.side!==1) return fail('NPC 只在右侧布防。');
         if (!Number.isInteger(a.card) || a.card<0 || a.card>=R.shop.size ||
             a.revision!==p.shopRevision || !p.shop[a.card]) return fail('货架已变化，请重新选择。');
         const type=p.shop[a.card];
@@ -103,12 +112,15 @@
           return {ok:true,type,merged:true,stolen};
         }
         p.shop[a.card]=null;
-        s.towers[a.to]={type,level:1,owner:side,cd:0,shots:0,spiritShots:0};
+        const spec=R.towers[type];
+        s.towers[a.to]={type,level:1,owner:side,cd:spec.income?spec.interval:0,shots:0,spiritShots:0};
         this.effect('summon',pos,{side});
         return {ok:true,type};
       }
       if (a.kind==='merge') {
-        if (!slot(a.from) || !slot(a.to) || a.from===a.to) return fail('请选择另一个阵位。');
+        const target=slot(a.to);
+        if (!slot(a.from) || !target || a.from===a.to) return fail('请选择另一个阵位。');
+        if (this.npc && side===1 && target.side!==1) return fail('NPC 只在右侧布防。');
         const from=s.towers[a.from], dest=s.towers[a.to];
         if (!from || from.owner!==side) return fail('只能拖动自己的单位。');
         if (!dest || from.type!==dest.type || from.level!==dest.level || from.level>=R.maxLevel) {
@@ -123,7 +135,7 @@
         if (p.relic?.slot===a.from) p.relic.slot=a.to;
         s.towers[a.from]=null;
         s.towers[a.to]={...dest,owner:side,level:dest.level+1,cd:Math.max(from.cd,dest.cd),shots:0,spiritShots:0};
-        this.effect('merge',slot(a.to),{side,text:(stolen?'夺阵 · ':'升阶 · ')+('贰叁'[dest.level-1])});
+        this.effect('merge',target,{side,text:(stolen?'夺阵 · ':'升阶 · ')+('贰叁'[dest.level-1])});
         return {ok:true,stolen};
       }
       const supportOpen=s.wave>=R.relicWave || (s.wave===R.relicWave-1 && s.phase==='prepare');
@@ -160,6 +172,7 @@
         const [x,y]=R.board.gates[side], gate={x,y};
         const pos={x:a.x,y:a.y};
         if (hero.radius && (!Number.isFinite(a.x)||!Number.isFinite(a.y)||a.x<0||a.y<0||a.x>R.board.W||a.y>R.board.H)) return fail('请选择战场上的位置。');
+        let castAt=hero.radius?pos:gate;
         if (hero.heal) {
           if (p.hp===R.hp) return fail('镇关关耐已满。');
           const healed=Math.min(hero.heal,R.hp-p.hp);
@@ -176,6 +189,7 @@
             const target=targets.reduce((a,b)=>a.maxHp>=b.maxHp?a:b);
             target.mark ??= [0,0];
             target.mark[side]=s.time+hero.duration;
+            castAt=target;
             this.effect('mark',target,{side,duration:.85,text:hero.skill});
           } else {
             for(const e of targets) {
@@ -188,6 +202,7 @@
           this.effect('field',pos,{side,radius:hero.radius,duration:hero.duration,hero:p.hero});
         }
         if (!hero.radius && !hero.heal) this.effect('summon',gate,{side,text:hero.skill});
+        this.effect('cast',gate,{side,hero:p.hero,tx:castAt.x,ty:castAt.y,duration:1.06});
         p.cooldown=s.time+hero.cooldown;
         return ok;
       }
@@ -226,10 +241,90 @@
       const marked=e.mark?.[owner]>time?R.heroes.houyi.mark:1;
       const spiritBoost=(spirit===R.spirits.fox && e.type==='spirit') || (spirit===R.spirits.whiteTiger && d.elite);
       e.hp-=damage*(1-armor)*marked*(spiritBoost?spirit.damage:1);
+      e.hitAt=time;
       if(e.hp>0) return;
       const p=this.state.players[owner], reward=d.reward+(relic?.bonus||0);
       p.gold+=reward;p.bounty+=reward;p.kills++;
       this.effect('bounty',e,{side:owner,text:'+'+reward+' 灵气',duration:.68});
+    }
+
+    useTower(i,dt,fields) {
+      const s=this.state, t=s.towers[i], pos=R.board.slots[i];
+      const spec=R.towers[t.type], lv=R.levels[t.level], owner=s.players[t.owner];
+      if(spec.income) {
+        t.cd=Math.max(0,t.cd-dt);
+        if(t.cd>1e-8) return;
+        t.cd=spec.interval;
+        owner.gold+=lv.qi;
+        this.effect('harvest',pos,{slot:i,side:t.owner,type:t.type,text:'+'+lv.qi+' 灵气',duration:spec.fxTime});
+        return;
+      }
+
+      const localFields=fields.filter(f=>f.side===t.owner && sq(pos,f)<=f.radius**2).map(f=>R.heroes[f.hero]);
+      const selectedSpirit=owner.spirit && R.spirits[owner.spirit.kind];
+      const spirit=selectedSpirit?.anchor && sq(pos,R.board.slots[owner.spirit.slot])<=selectedSpirit.radius**2?selectedSpirit:null;
+      const relic=owner.relic?.slot===i ? R.relics[owner.relic.kind] : null;
+      const haste=(owner.buff>s.time ? R.heroes.changxi.haste : 1)*(spirit?.haste||1);
+      t.cd=Math.max(0,t.cd-dt*haste);
+      if(t.cd>1e-8) return;
+      const ranged=localFields.reduce((total,h)=>total+(h.range||0),0);
+      const limit=(spec.range+lv.range+ranged+(relic?.range||0)+(spirit?.range||0))**2;
+      let target=null;
+      for(const e of s.enemies) {
+        if(e.hp>0 && sq(e,pos)<=limit && (!target || e.distance>target.distance)) target=e;
+      }
+      if(!target) return;
+      const relicProc=relic?.every && ++t.shots%relic.every===0;
+      const phoenix=spirit?.burst && ++t.spiritShots%spirit.every===0;
+      const boost=localFields.reduce((mul,h)=>mul*(h.damage||1),1)*(relicProc?(relic.damage||1):1);
+      const damage=spec.damage*lv.damage*boost;
+      const radius=spec.splash ? spec.splash+(spirit?.splash||0)+localFields.reduce((total,h)=>total+(h.splash||0),0) : 0;
+      t.cd=spec.interval;
+      t.facing=target.x<pos.x?-1:1;
+      this.effect('attack',pos,{slot:i,tx:target.x,ty:target.y,target:target.id,side:t.owner,type:t.type,radius,duration:spec.fxTime});
+      if(relicProc && relic.shred) target.shredUntil=s.time+relic.duration;
+      if(relic?.slow && target.type==='spirit' && !((target.qinSides||0)&(1<<t.owner))) {
+        target.qinSides=(target.qinSides||0)|(1<<t.owner);
+        target.qinUntil=s.time+relic.duration;
+      }
+      this.hit(target,damage,t.owner,relic,spirit,fields);
+      if(spec.stun && target.hp>0) target.stunUntil=Math.max(target.stunUntil||0,s.time+spec.stun);
+      if(spec.burn && target.hp>0) {
+        target.burns??=[null,null];
+        const previous=target.burns[t.owner];
+        target.burns[t.owner]={
+          damage:spec.burn.damage*lv.damage*boost, interval:spec.burn.tick,
+          next:previous?.next??s.time+spec.burn.tick, until:s.time+spec.burn.duration,
+          bonus:relic?.bonus||0, spirit:spirit ? owner.spirit.kind : null
+        };
+      }
+      if(!radius && !phoenix) return;
+      if(phoenix) this.effect('burst',target,{side:t.owner,radius:spirit.burst,type:'phoenix'});
+      for(const e of s.enemies) {
+        if(e===target || e.hp<=0) continue;
+        const distance=sq(e,target);
+        const inRange=radius>0 && distance<=radius**2;
+        const extra=(inRange?spec.splashRatio:0)+(phoenix&&distance<=spirit.burst**2?spirit.ratio:0);
+        if(extra>0) this.hit(e,damage*extra,t.owner,relic,spirit,fields);
+        if(spec.stun && inRange && e.hp>0) e.stunUntil=Math.max(e.stunUntil||0,s.time+spec.stun);
+      }
+    }
+
+    updateBurns(fields,initiative) {
+      const {enemies,time}=this.state;
+      for(const e of enemies) {
+        if(e.hp<=0 || !e.burns) continue;
+        for(const side of [initiative,1-initiative]) {
+          const burn=e.burns[side];
+          if(!burn) continue;
+          // Finish any due ticks without resetting their clock when a hit refreshes the burn.
+          while(e.hp>0 && burn.next<=Math.min(time,burn.until)+1e-8) {
+            this.hit(e,burn.damage,side,burn,R.spirits[burn.spirit],fields);
+            burn.next+=burn.interval;
+          }
+          if(time>=burn.until) e.burns[side]=null;
+        }
+      }
     }
     tick(dt) {
       if(this.state.paused) return;
@@ -258,48 +353,9 @@
       // Alternate initiative and traversal across the mirrored board.
       for(let k=0;k<s.towers.length;k++) {
         const i=(step&1) ? s.towers.length-1-k : k;
-        const t=s.towers[i];
-        if (!t) continue;
-        const p=R.board.slots[i], spec=R.towers[t.type], lv=R.levels[t.level], owner=s.players[t.owner];
-        const localFields=fields.filter(f=>f.side===t.owner && sq(p,f)<=f.radius**2).map(f=>R.heroes[f.hero]);
-        const selectedSpirit=owner.spirit && R.spirits[owner.spirit.kind];
-        const spirit=selectedSpirit?.anchor && sq(p,R.board.slots[owner.spirit.slot])<=selectedSpirit.radius**2?selectedSpirit:null;
-        const relic=owner.relic?.slot===i ? R.relics[owner.relic.kind] : null;
-        const haste=(owner.buff>s.time ? R.heroes.changxi.haste : 1)*(spirit?.haste||1);
-        t.cd=Math.max(0,t.cd-dt*haste);
-        if(t.cd>0) continue;
-        const ranged=localFields.reduce((total,h)=>total+(h.range||0),0);
-        const limit=(spec.range+lv.range+ranged+(relic?.range||0)+(spirit?.range||0))**2;
-        let target=null;
-        for(const e of s.enemies) {
-          if(e.hp>0 && sq(e,p)<=limit && (!target || e.distance>target.distance)) target=e;
-        }
-        if (!target) continue;
-        const relicProc=relic?.every && ++t.shots%relic.every===0;
-        const phoenix=spirit?.burst && ++t.spiritShots%spirit.every===0;
-        const boost=localFields.reduce((mul,h)=>mul*(h.damage||1),1);
-        const dmg=spec.damage*lv.damage*boost*(relicProc?(relic.damage||1):1);
-        const splash=spec.splash && spec.splash+(spirit?.splash||0)+localFields.reduce((total,h)=>total+(h.splash||0),0);
-        t.cd=spec.interval;
-        this.effect('shot',p,{tx:target.x,ty:target.y,side:t.owner,type:t.type,duration:.19});
-        if(spec.slow) {
-          target.slow=spec.slow;target.slowUntil=s.time+spec.slowTime;
-        }
-        if(relicProc && relic.shred) target.shredUntil=s.time+relic.duration;
-        if(relic?.slow && target.type==='spirit' && !((target.qinSides||0)&(1<<t.owner))) {
-          target.qinSides=(target.qinSides||0)|(1<<t.owner);
-          target.qinUntil=s.time+relic.duration;
-        }
-        this.hit(target,dmg,t.owner,relic,spirit,fields);
-        if(splash || phoenix) {
-          this.effect('burst',target,{side:t.owner,radius:Math.max(splash||0,phoenix?spirit.burst:0),type:phoenix?'phoenix':t.type});
-          for(const e of s.enemies) {
-            if(e===target) continue;
-            const d=sq(e,target), extra=(splash&&d<=splash**2?spec.splashRatio:0)+(phoenix&&d<=spirit.burst**2?spirit.ratio:0);
-            if(extra>0) this.hit(e,dmg*extra,t.owner,relic,spirit,fields);
-          }
-        }
+        if(s.towers[i]) this.useTower(i,dt,fields);
       }
+      this.updateBurns(fields,step&1);
       this.updateBosses();
       const live=[];
       for(const e of s.enemies) {
@@ -308,7 +364,7 @@
         const inField=fields.some(f=>R.heroes[f.hero].slow && sq(e,f)<=f.radius**2);
         const slow=Math.max(d.minSlow||0,Math.min(e.slowUntil>s.time?e.slow:1,
           e.qinUntil>s.time?R.relics.qin.slow:1,inField?R.heroes.jingwei.slow:1));
-        if (!(e.devourAt>s.time)) e.distance+=d.speed*slow*dt;
+        if (!(e.devourAt>s.time || e.stunUntil>s.time)) e.distance+=d.speed*slow*dt;
         Object.assign(e,at(e.branch,e.gate,e.distance));
         if(e.distance>=routes[e.branch][e.gate].total) {
           this.leak(e,d.leak);
@@ -336,38 +392,68 @@
         return;
       }
       if(s.phase==='battle' && p.cooldown<=s.time) {
-        const target=s.enemies.filter(e=>e.hp>0 && R.enemies[e.type].elite)
+        const target=s.enemies.filter(e=>e.hp>0 && e.gate===1 && R.enemies[e.type].elite)
           .sort((a,b)=>b.maxHp-a.maxHp)[0];
         if(target) {
           this.command(1,{kind:'skill',x:target.x,y:target.y},true);
           return;
         }
       }
-      const candidates=p.shop.map((type,card)=>({type,card})).filter(c=>c.type);
-      const steal=candidates.flatMap(c=>s.towers.map((t,to)=>({c,t,to})))
-        .find(x=>x.t && x.t.owner===0 && x.t.level===1 && x.t.type===x.c.type);
-      if(steal) {
-        this.command(1,{kind:'place',card:steal.c.card,revision:p.shopRevision,to:steal.to},true);
-        return;
-      }
-      const owned=s.towers.map((t,i)=>({t,i})).filter(x=>x.t?.owner===1);
-      for(const from of owned) {
-        const target=owned.find(x=>x.i!==from.i && x.t.level===from.t.level &&
-          x.t.type===from.t.type && x.t.level<R.maxLevel);
-        if(target && owned.length>=6) {
-          this.command(1,{kind:'merge',from:from.i,to:target.i},true);return;
+      const own=rightPads.filter(pos=>s.towers[pos.id]?.owner===1);
+      const attackers=own.filter(pos=>!R.towers[s.towers[pos.id].type].income);
+      const empty=rightPads.length-rightPads.filter(pos=>s.towers[pos.id]).length;
+      const urgent=p.hp<=5;
+      const threats=s.enemies.filter(e=>e.hp>0 && e.gate===1);
+      const lane=rightLane.map(point=>{
+        const coverage=attackers.filter(pos=>{
+          const t=s.towers[pos.id], spec=R.towers[t.type];
+          return sq(pos,point)<=(spec.range+R.levels[t.level].range)**2;
+        }).length;
+        return {point,weight:(1+(urgent?1.6:.5)*point.progress**3)/(1+.54*coverage)};
+      });
+      const score=(type,pos,level)=>{
+        const spec=R.towers[type], lv=R.levels[level];
+        if(spec.income) {
+          const busy=lane.filter(({point})=>sq(point,pos)<105**2).length;
+          return (attackers.length>=2?33:-24)+lv.qi*3-(own.length-attackers.length)*19
+            -busy*.8+(pos.y>355?5:0);
+        }
+        const reach=(spec.range+lv.range)**2;
+        const coverage=lane.reduce((sum,{point,weight})=>sum+(sq(point,pos)<=reach?weight:0),0);
+        const danger=threats.reduce((sum,e)=>sum+(sq(e,pos)<=reach?
+          (3+R.enemies[e.type].leak)*e.distance/routes[e.branch][1].total:0),0);
+        const strength=spec.damage/spec.interval+(spec.stun?14:0)+(spec.burn?8:0)+(spec.splash?5:0);
+        return coverage*(.66+strength/50)*lv.damage+Math.min(22,danger)*1.6;
+      };
+      let best=null;
+      const consider=(value,action)=>{if(value>(best?.value??0)) best={value,action};};
+      for(const [card,type] of p.shop.entries()) {
+        if(!type) continue;
+        for(const pos of rightPads) {
+          const t=s.towers[pos.id];
+          if(t && (t.type!==type || t.level!==1)) continue;
+          const value=score(type,pos,1);
+          const gain=t ? value*(t.owner===1 ? .82 : 1.65) : value;
+          consider(gain,{kind:'place',card,to:pos.id,revision:p.shopRevision});
         }
       }
-      if(candidates.length) {
-        const positions=R.board.slots.filter(pos=>!s.towers[pos.id]);
-        positions.sort((a,b)=>{
-          const score=pos=>Math.min(...routes.flatMap(branch=>branch.map(route=>
-            Math.min(...route.pieces.map(piece=>Math.hypot(pos.x-piece.x,pos.y-piece.y))))))
-            +(pos.side===1?0:22)+(pos.y<300?-12:0);
-          return score(a)-score(b);
-        });
-        if(positions.length) this.command(1,{kind:'place',card:candidates[0].card,revision:p.shopRevision,to:positions[0].id},true);
-      } else if(p.gold>=R.shop.refreshBase+p.refreshCount*R.shop.refreshStep) {
+      // Combine compatible units when a stronger location or freeing a pad is worth the move.
+      if(attackers.length>=4) for(const from of own) {
+        const unit=s.towers[from.id];
+        if(unit.level>=R.maxLevel) continue;
+        const lost=score(unit.type,from,unit.level);
+        for(const pos of rightPads) {
+          const t=s.towers[pos.id];
+          if(pos===from || t?.type!==unit.type || t.level!==unit.level) continue;
+          const steal=t.owner===0, previous=score(t.type,pos,t.level);
+          const value=score(t.type,pos,t.level+1)-lost+previous*(steal ? .45 : -1)+(empty<2?12:0);
+          consider(value,{kind:'merge',from:from.id,to:pos.id});
+        }
+      }
+      if(best) {
+        this.command(1,best.action,true);
+      } else if((empty || rightPads.some(pos=>s.towers[pos.id]?.level===1)) &&
+                p.gold>=R.shop.refreshBase+p.refreshCount*R.shop.refreshStep) {
         this.command(1,{kind:'refreshShop'},true);
       }
     }

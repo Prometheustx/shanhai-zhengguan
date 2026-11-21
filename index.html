@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="ui-jade.css">
   <script defer src="rules.js"></script>
   <script defer src="engine.js"></script>
+  <script defer src="battle-effects.js"></script>
   <script defer src="map.js"></script>
   <script defer src="app.js"></script>
 </head>
@@ -17,14 +18,18 @@
     <div class="lobby-panel">
       <div class="lobby-heading"><div><span class="lobby-kicker">山海争关 · 回龙谷</span><h2>选择守关人</h2></div><button id="lobbyRoom" type="button">联机房间</button></div>
       <p id="lobbyNote" class="lobby-note">选择你的守关人，进入回龙谷。</p>
-      <div class="lobby-players">
-        <div class="lobby-player" id="lobbyPlayer0"><span class="lobby-portrait" aria-hidden="true"></span><label for="hero0">左关 · 1P</label><select id="hero0"></select><p class="hero-description"></p><button class="confirm-hero" type="button">确认守关人</button></div>
-        <div class="lobby-player" id="lobbyPlayer1"><span class="lobby-portrait" aria-hidden="true"></span><label for="hero1">右关 · 2P</label><select id="hero1"></select><p class="hero-description"></p><button class="confirm-hero" type="button">确认守关人</button></div>
+      <div class="hero-grid" id="heroGrid" role="group" aria-label="守关人名册"></div>
+      <div class="hero-selection">
+        <div>
+          <strong id="heroSelection"></strong>
+          <p class="hero-description" id="heroDescription"></p>
+        </div>
+        <button id="confirmHero" type="button">确认守关人</button>
       </div>
       <p id="lobbyStatus" class="lobby-status" aria-live="polite"></p>
     </div>
   </section>
-  <main>
+  <main inert>
     <header class="masthead">
       <div class="wordmark"><span class="seal" aria-hidden="true">山<br>海</span><div><div class="eyebrow">山海异闻录 · 卷一</div><h1>山海争关</h1></div></div>
       <div class="top-right"><span class="mode" id="mode">本地双人</span><button id="room" type="button">联机房间</button><button id="help" type="button">玩法</button><button id="restart" type="button">重开</button></div>

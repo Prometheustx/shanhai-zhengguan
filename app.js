@@ -9,13 +9,14 @@
     relic:{ids:Object.keys(R.relics),columns:3},
     spirit:{ids:Object.keys(R.spirits),columns:5}
   };
-  function icon(family,id,extra='') {
+  function icon(family,id) {
     const {ids,columns}=iconGrids[family], index=ids.indexOf(id);
     const x=index%columns/(columns-1)*100, y=Math.floor(index/columns)*100;
-    return '<span class="myth-art '+family+'-art '+extra+'" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></span>';
+    return '<span class="myth-art '+family+'-art" aria-hidden="true" style="background-position:'+x+'% '+y+'%"></span>';
   }
   let game=new Engine.Game(undefined,{npc:true}), s=game.state, side=0, session=null, online=[false,false], restart=[false,false];
   let picked=null, from=null, hover=null, targeting=null, drag=null, lastUI='', lastSlots='', last=performance.now(), acc=0;
+  let chosenHero=R.defaultHero, confirming=false, lobbyError='', snapshotAt=last;
   const slotButtons=R.board.slots.map(slot=>{
     const btn=document.createElement('button');
     btn.type='button';btn.className='slot';btn.dataset.slot=slot.id;
@@ -43,12 +44,27 @@
     $('cards').append(b);
     return b;
   });
-  for(const i of [0,1]){
-    for(const [id,h] of Object.entries(R.heroes)) $('hero'+i).add(new Option(h.name+' · '+h.skill,id));
-    $('hero'+i).onchange=e=>command({kind:'hero',hero:e.target.value},i);
-    $('lobbyPlayer'+i).querySelector('.confirm-hero').onclick=()=>command({kind:'confirmHero'},i);
-  }
-  $('lobbyRoom').onclick=()=>$('room').click();
+  const heroCards=Object.entries(R.heroes).map(([id,h])=>{
+    const card=document.createElement('button');
+    card.type='button';
+    card.className='hero-card';
+    card.dataset.hero=id;
+    card.title=h.desc;
+    card.innerHTML='<span class="hero-art" aria-hidden="true"></span><strong>'+h.name+'</strong><small>'+h.skill+'</small>';
+    BoardArt.guardianPortrait(card.firstElementChild,id);
+    card.onclick=()=>{if(!confirming){chosenHero=id;lobbyError='';}};
+    $('heroGrid').append(card);
+    return card;
+  });
+  $('confirmHero').onclick=async()=>{
+    if(confirming || s.phase!=='lobby' || s.players[side].heroConfirmed) return;
+    const current=session;
+    confirming=true;lobbyError='';
+    const selected=await command({kind:'hero',hero:chosenHero});
+    if(session!==current) return;
+    const confirmed=selected && await command({kind:'confirmHero'});
+    if(session===current && (!confirmed || !session)) confirming=false;
+  };
   $('refresh').onclick=()=>{clearDrag();picked=null;command({kind:'refreshShop'});};
   $('pause').onclick=()=>{clearDrag();command({kind:'pause'});};
   $('speed').onclick=()=>command({kind:'speed',value:s.speed===1?2:1});
@@ -116,6 +132,7 @@
   function reset(){
     clearDrag();
     game=new Engine.Game(undefined,{npc:true});s=game.state;side=0;picked=null;from=null;targeting=null;lastUI='';lastSlots='';
+    chosenHero=s.players[0].hero;confirming=false;lobbyError='';
     msg('拖动单位，修饰空阵台。');
   }
   $('restart').onclick=()=>{
@@ -137,12 +154,19 @@
   function connect(info){
     const credentials={room:info.room,token:info.token,side:info.side};
     side=info.side;s=info.state;online=info.online;restart=info.restart;from=null;targeting=null;lastUI='';
+    snapshotAt=performance.now();
+    chosenHero=s.players[side].hero;confirming=false;lobbyError='';
     const source=new EventSource('/api/events?'+new URLSearchParams({room:info.room,token:info.token}));
     session={...credentials,source};
     source.onmessage=e=>{
       if(session?.source!==source) return;
       const data=JSON.parse(e.data);
       if(data.state.wave<s.wave){from=null;targeting=null;picked=null;}
+      if(data.state.phase==='lobby' && s.phase!=='lobby') {
+        chosenHero=data.state.players[side].hero;confirming=false;lobbyError='';
+      }
+      if(data.state.players[side].heroConfirmed) confirming=false;
+      snapshotAt=performance.now();
       s=data.state;online=data.online;restart=data.restart;
     };
     source.onerror=()=>{
@@ -154,7 +178,7 @@
     source.addEventListener('ended',()=>{if(session?.source===source) disconnect('房间已关闭。');});
     dialog.close();
   }
-  $('room').onclick=()=>{
+  $('room').onclick=$('lobbyRoom').onclick=()=>{
     if(location.protocol==='file:'){
       show('联机房间','<p>在游戏目录内运行 <code>node server.js</code>，再打开 <code>http://localhost:8787</code>。两台电脑对战时，另一位用主机的局域网 IP 和相同端口打开页面。</p>');return;
     }
@@ -178,13 +202,15 @@
     $('createRoom').onclick=()=>launch(true);$('joinRoom').onclick=()=>launch(false);
   };
   async function command(action,actor=side){
-    if(session && (actor!==side || !online[side])){msg('等待房间连接。',true);return false;}
+    const inLobby=s.phase==='lobby';
+    const reportError=message=>{if(inLobby) lobbyError=message;else msg(message,true);};
+    if(session && (actor!==side || !online[side])){reportError('等待房间连接。');return false;}
     const current=session;
     let result;
     try{result=current ? await post('action',{room:current.room,token:current.token,action}) : game.command(actor,action);}
-    catch(e){if(session===current) msg(e.message,true);return false;}
+    catch(e){if(session===current) reportError(e.message);return false;}
     if(session!==current) return false;
-    if(!result.ok){msg(result.error,true);return false;}
+    if(!result.ok){reportError(result.error);return false;}
     if(action.kind==='merge') msg(names[actor]+(result.stolen?'夺下一座阵位，合成塔今后为该方获取灵气。':'完成合成，单位已升阶。'));
     if(action.kind==='place') {picked=null;msg(result.merged?(result.stolen?'夺取并升为二级。':'合成升为二级。'):names[actor]+'已召唤'+R.towers[result.type].name+'。');}
     if(action.kind==='refreshShop') msg('商店已刷新。');
@@ -260,8 +286,7 @@
         const available=canPlace(drag);
         msg(available?'松手放置，或拖到同种一级塔上升级。':'货架已变化，请重新选择。',!available);
       }
-      const unit=R.towers[drag.type];
-      mark.hidden=false;mark.className='drag-mark item-art item-'+drag.type;mark.style.color=unit.color;
+      mark.hidden=false;mark.className='drag-mark item-art item-'+drag.type;
     }
     drag.over=slotAt(e);
     mark.style.left=e.clientX+'px';mark.style.top=(e.clientY-(e.pointerType==='touch'?18:0))+'px';
@@ -290,23 +315,28 @@
   function renderUI(){
     const p=s.players[side], skillWait=Math.max(0,Math.ceil(p.cooldown-s.time)), hero=R.heroes[p.hero], relic=p.relic && R.relics[p.relic.kind];
     const remaining=s.preparationLeft==null?null:Math.ceil(s.preparationLeft);
-    const key=JSON.stringify([s.phase,s.wave,s.paused,s.speed,remaining,s.players.map(x=>[x.hp,x.gold,x.kills,x.bounty,x.steals,x.ready,x.hero,x.heroConfirmed,x.shop,x.shopRevision,x.refreshCount,x.relic,x.spirit]),side,skillWait,picked,targeting?.kind,from,s.result,session?.room,online,restart]);
+    const key=JSON.stringify([s.phase,s.wave,s.paused,s.speed,remaining,s.players.map(x=>[x.hp,x.gold,x.kills,x.bounty,x.steals,x.ready,x.hero,x.heroConfirmed,x.shop,x.shopRevision,x.refreshCount,x.relic,x.spirit]),side,skillWait,picked,targeting?.kind,from,s.result,session?.room,online,restart,chosenHero,confirming,lobbyError]);
     if(key!==lastUI){
       lastUI=key;
-      $('lobby').hidden=s.phase!=='lobby';
-      $('lobbyPlayer1').hidden=!session;
-      document.querySelector('.lobby-players').classList.toggle('solo',!session);
-      for(const i of [0,1]){
-        const x=s.players[i],select=$('hero'+i),panel=$('lobbyPlayer'+i),allowed=session?(side===i&&online[i]):i===0;
-        select.value=x.hero;select.disabled=x.heroConfirmed||!allowed;
-        BoardArt.guardianPortrait(panel.querySelector('.lobby-portrait'),x.hero);
-        panel.querySelector('.hero-description').textContent=R.heroes[x.hero].desc;
-        const confirm=panel.querySelector('.confirm-hero');
-        confirm.disabled=x.heroConfirmed||!allowed;
-        confirm.textContent=!session&&i===1?'NPC 自动选择':x.heroConfirmed?'已确认':session&&side!==i?'等待对方选择':'确认守关人';
+      const inLobby=s.phase==='lobby';
+      $('lobby').hidden=!inLobby;
+      document.querySelector('main').inert=inLobby;
+      if(inLobby) {
+        const id=p.heroConfirmed?p.hero:chosenHero, selected=R.heroes[id];
+        const disabled=p.heroConfirmed || confirming || !!(session&&!online[side]);
+        for(const card of heroCards) {
+          card.disabled=disabled;
+          card.setAttribute('aria-pressed',card.dataset.hero===id);
+        }
+        $('heroSelection').textContent=names[side]+' · '+selected.name+' · '+selected.skill;
+        $('heroDescription').textContent=selected.desc;
+        $('confirmHero').disabled=disabled;
+        $('confirmHero').textContent=p.heroConfirmed?'已确认':confirming?'确认中…':'确认守关人';
+        $('lobbyNote').textContent=session?'从名册选一位守关人。双方确认后入场。':'单人对战 · 右关由 NPC 应战。';
+        $('lobbyStatus').textContent=lobbyError || (session
+          ? '房间 '+session.room+' · '+(!online.every(Boolean)?'等待另一位玩家连接':s.players[1-side].heroConfirmed?'对方已确认':'等待对方确认')
+          : '');
       }
-      $('lobbyNote').textContent=session?'双方各选一位守关人，确认后进入战场。':'选择你的守关人，右关由 NPC 自动应战。';
-      $('lobbyStatus').textContent=session?('房间 '+session.room+' · '+(!online.every(Boolean)?'等待另一位玩家连接':'各自确认守关人后进入')):'单人对战 · 右关为 NPC';
       const index=displayedWave(), wave=R.waves[index];
       $('waveNum').textContent='第 '+(index+1)+' / '+R.waves.length+' 波';
       $('waveName').textContent=wave.name;
@@ -375,8 +405,6 @@
         btn.classList.toggle('occupied',!!t);btn.classList.toggle('on',i===from);btn.classList.toggle('drop',from!=null&&!!validMerge(from,i));
         btn.classList.toggle('place-target',!!placement&&canPlaceOn(drag,t));
         btn.classList.toggle('place-hover',!!placement&&canPlaceOn(drag,t)&&i===dropSlot);
-        btn.innerHTML=t?'<span class="tower-art item-art item-'+t.type+'" aria-hidden="true"></span><span class="rank" aria-hidden="true">'+
-          '<i></i>'.repeat(t.level)+'</span>'+(r?icon('relic',a.kind,'rune'):''):'';
       }
     }
   }
@@ -387,8 +415,11 @@
       while(acc>=1/60){game.tick(1/60);acc-=1/60;}
     }
     renderUI();
-    const pos=drag?.moved?drag.over:from??hover, t=s.towers[pos], chosen=R.towers[s.players[side].shop[picked]], canPreview=pos!=null&&!targeting&&(t||chosen);
-    BoardArt.draw(c,s,canPreview?{slot:pos,range:t?R.towers[t.type].range+R.levels[t.level].range:chosen.range}:null);
+    const pos=drag?.moved?drag.over:from??hover, t=s.towers[pos];
+    const spec=R.towers[t?t.type:s.players[side].shop[picked]];
+    const preview=pos!=null && !targeting && spec?.range ? {slot:pos,range:spec.range+(t?R.levels[t.level].range:0)} : null;
+    const visualTime=s.time+(session && !s.paused && online.every(Boolean)?Math.max(0,Math.min(.05,(now-snapshotAt)/1000))*s.speed:0);
+    if(s.phase!=='lobby') BoardArt.draw(c,s,preview,visualTime);
     requestAnimationFrame(frame);
   }
   requestAnimationFrame(frame);

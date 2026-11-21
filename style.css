@@ -94,14 +94,6 @@ dialog{width:min(500px,calc(100% - 28px));padding:21px;background:#1c2e28;color:
 .lobby-heading{display:flex;justify-content:space-between;align-items:center;gap:12px}
 .lobby-heading h2{font:700 28px var(--serif);margin:4px 0}.lobby-kicker{font-size:11px;letter-spacing:.18em;color:#ccb287}
 .lobby-note,.lobby-status{font-size:12px;color:#bdcbb9;margin:8px 0}
-.lobby-players{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.lobby-players.solo{grid-template-columns:1fr}
-.lobby-player{display:grid;gap:8px;padding:14px;background:#243b30;border:1px solid #567563;border-radius:5px}
-.lobby-player:nth-child(2){border-color:#927558;background:#382f27}
-.lobby-player label{font:700 18px var(--serif);color:#d5e9ce}.lobby-player select{width:100%}
-.hero-description{margin:0;color:#c7d2c1;font-size:12px;min-height:35px}
-.lobby-player button{background:#445c48;border-color:#92a783}.lobby-player button:disabled{opacity:.65}
-body .lobby-player:nth-child(2) select{opacity:.72}
 dialog{z-index:30}
 .commands{background:linear-gradient(150deg,#293b31,#172721);border-color:#8d7651;box-shadow:inset 0 0 0 2px #15251e,inset 0 0 0 3px #806d4b80}
 .commands-head strong{color:#f5dfb4}.shop-caption{display:flex;justify-content:space-between;align-items:center;gap:4px;margin-top:8px;color:#c6b692;font-size:11px}
@@ -124,8 +116,9 @@ body{background:#101d1a}
 .card .glyph{background:#304c3e;border:1px solid #988258;color:var(--glyph);box-shadow:inset 0 0 0 2px #1c332c}
 .card[aria-pressed=true]{background:linear-gradient(145deg,#f6eaca,#d1caa4)}
 .card:disabled{background:#24372e;border-color:#5b6953}.empty-card{color:#a0ad95}
-.item-art{display:block;aspect-ratio:1;background-image:url('assets/ink-combat.webp');background-repeat:no-repeat;background-size:400% 200%;background-position:var(--item-x) 100%}
-.item-sword{--item-x:33.3333%}.item-thunder{--item-x:66.6667%}.item-frost{--item-x:100%}
+.item-art{display:block;aspect-ratio:1;background-image:url('assets/battle-weapons.webp');background-repeat:no-repeat;background-size:300% 200%;background-position:var(--item-x) var(--item-y,0%)}
+.item-bell,.item-seal{--item-x:0%}.item-cauldron,.item-spear{--item-x:50%}.item-bow,.item-hammer{--item-x:100%}
+.item-seal,.item-spear,.item-hammer{--item-y:100%}
 .card .item-art{width:44px;filter:drop-shadow(0 2px 2px #25352355)}
 @media (orientation:landscape) and (max-height:620px){main .card .item-art{width:33px;height:35px}}
 .player{background:linear-gradient(110deg,#162f29,#20352b);border-color:#8d7652}
@@ -135,9 +128,6 @@ body{background:#101d1a}
 .battlefield{border-color:#887a59}
 @media (orientation:landscape) and (max-height:620px){
  .lobby-panel{padding:10px 15px}.lobby-heading h2{font-size:20px}.lobby-note,.lobby-status{margin:3px 0;font-size:10px}
- .lobby-players{gap:7px}.lobby-player{gap:4px;padding:7px}.lobby-player label{font-size:14px}
- .lobby-player select,.lobby-player button{padding:4px 7px;min-height:27px;font-size:11px}
- .hero-description{min-height:24px;font-size:10px}
  main .commands{padding:6px}main .shop-caption{margin-top:4px;font-size:9px}
  main #refresh{padding:3px 5px;font-size:10px;min-height:25px}
  main #cards{grid-template-columns:repeat(2,minmax(0,1fr));gap:4px}

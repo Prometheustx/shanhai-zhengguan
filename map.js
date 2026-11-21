@@ -17,9 +17,15 @@
   }
   const terrain=sheet('ink-valley',3);
   const combat=sheet('ink-combat',4);
+  const weapons=sheet('battle-weapons',3);
   const guardians=sheet('ink-guardians',5);
+  const castPoses=sheet('guardians-cast',5);
+  const walkPoses=sheet('enemies-stride',3);
   const spirits=sheet('ink-spirits',5);
+  const relics=sheet('ink-relics',3);
   const guardianIds=Object.keys(Rules.heroes), spiritIds=Object.keys(Rules.spirits);
+  const weaponIds=Object.keys(Rules.towers), relicIds=Object.keys(Rules.relics);
+  const padDepth=[...slots].sort((a,b)=>a.y-b.y);
   const enemyArt={ghost:[0,42],spirit:[1,46],demon:[2,51],lord:[3,56],taotie:[4,78]};
   const loaded=({image})=>image.complete && image.naturalWidth>0;
 
@@ -167,6 +173,7 @@
 
   function drawEnemy(c,e,time) {
     const {x,y}=e, spec=Rules.enemies[e.type], [i,size]=enemyArt[e.type], r=spec.radius;
+    const quiet=reducedMotion.matches, ghost=e.type==='ghost';
     c.save();
     c.globalAlpha=Math.max(.18,Math.min(1,e.hp/e.maxHp));
     ellipse(c,x,y+3,r+2,r*.41,'#221c36a6');
@@ -178,19 +185,28 @@
     if(loaded(combat)) {
       const ahead=Engine.at(e.branch,e.gate,e.distance+8);
       const behind=Engine.at(e.branch,e.gate,e.distance-8);
-      const ghost=e.type==='ghost';
-      const stride=reducedMotion.matches||e.devourAt>time?0:Math.sin(e.distance/(ghost?16:5))*1.5;
-      sprite(c,combat,i,x,y+4+stride-(ghost?4:0),size,ahead.x<behind.x);
+      const stopped=e.stunUntil>time || e.devourAt>time;
+      const gait=(e.distance/(ghost?28:23)+e.id*.23)%1;
+      const alt=!quiet && loaded(walkPoses) && gait>=.36 && gait<.83 && !(e.devourAt>time);
+      const lift=quiet || stopped ? 0 : Math.sin(gait*Math.PI*2)*(ghost?2.4:1.5);
+      const hit=e.hitAt!=null?Math.max(0,1-(time-e.hitAt)*7):0;
+      const flip=ahead.x<behind.x, dir=flip?-1:1;
+      c.save();
+      c.translate(x+(quiet?0:-dir*hit*2.9),y+4-lift-(ghost?4:0));
+      if(!quiet) {c.rotate(-dir*hit*.095);c.scale(1+hit*.04,1-hit*.065);}
+      sprite(c,alt?walkPoses:combat,i,0,0,size,flip);
+      c.restore();
     } else {
       ellipse(c,x,y,r+1,r+1,ink);
       ellipse(c,x,y,r-1,r-1,spec.color);
     }
+    BattleFX.ailments(c,e,time,quiet);
     c.restore();
     poly(c,[[x-5,y+7],[x+5,y+7],[x,y+13]],colors[e.gate],ink);
   }
 
-  function drawPlatformEnergy(c,state) {
-    const time=reducedMotion.matches?0:state.time;
+  function drawPlatformEnergy(c,state,visualTime) {
+    const time=reducedMotion.matches?0:visualTime;
     for(const {x,y,id} of slots) {
       if(state.towers[id]) continue;
       ellipse(c,x,y-2,6,2,'#85f9d3');
@@ -202,15 +218,58 @@
     }
     c.globalAlpha=1;
   }
-  function drawGuardians(c,state) {
+  function drawGuardians(c,state,casts,leaks,time) {
+    const quiet=reducedMotion.matches;
     for(const [side,player] of state.players.entries()) {
-      const [x,y]=gates[side];
+      const [x,y]=gates[side], dir=side===0?1:-1;
+      const cast=casts[side], progress=cast?BattleFX.phase(cast,time):1;
+      const actionFrame=loaded(castPoses) && progress>=.12 && progress<.78;
+      const impulse=Math.sin(Math.PI*progress), recoil=leaks[side]?Math.max(0,1-2.8*BattleFX.phase(leaks[side],time)):0;
+      const breath=quiet?0:Math.sin(time*2.8+side*1.7);
+      const offset=quiet?0:dir*(impulse*(progress<.13?-3:5)-recoil*6);
       ellipse(c,x,y+2,19,5,'#24302b7a');
       if(loaded(guardians)) {
-        sprite(c,guardians,guardianIds.indexOf(player.hero),x,y+5,92,side===1);
+        c.save();c.translate(x+offset,y+5);
+        if(!quiet) {
+          c.rotate(dir*(recoil*.13+(progress<.13?-.10:.045)*impulse));
+          c.scale(1+impulse*.027,1+breath*.022-impulse*(actionFrame ? .015 : .036)-recoil*.055);
+        }
+        sprite(c,actionFrame?castPoses:guardians,guardianIds.indexOf(player.hero),0,0,92,side===1);
+        c.restore();
       } else {
         poly(c,[[x-12,y],[x-7,y-27],[x-5,y-32],[x+5,y-32],[x+10,y-25],[x+13,y]],colors[side],ink);
         ellipse(c,x,y-36,6,7,'#f7dbad');
+      }
+    }
+  }
+
+  function drawTowers(c,state,actions,time) {
+    for(const pos of padDepth) {
+      const {id,x,y}=pos, t=state.towers[id];
+      if(!t) continue;
+      const action=actions[id]?.side===t.owner && actions[id]?.type===t.type ? actions[id] : null;
+      const tint=colors[t.owner], move=BattleFX.weaponPose(t,action,time,id,reducedMotion.matches);
+      ellipse(c,x,y+1,15,5.1,ink);
+      ellipse(c,x,y,13.8,3.9,tint);
+      if(loaded(weapons)) {
+        const size=53+2.6*t.level;
+        c.save();c.translate(x+move.dx,y-1-move.lift);c.rotate(move.turn);c.scale(1,move.scaleY);
+        sprite(c,weapons,weaponIds.indexOf(t.type),0,0,size,move.flip);
+        c.restore();
+      } else {
+        ellipse(c,x,y-15,10,10,ink);
+        ellipse(c,x,y-15,8,8,Rules.towers[t.type].color);
+      }
+      for(let i=0;i<t.level;i++){
+        const dot=x+(i-(t.level-1)/2)*6;
+        ellipse(c,dot,y+8,2.8,2.8,ink);
+        ellipse(c,dot,y+8,1.8,1.8,tint);
+      }
+      const relic=state.players[t.owner].relic;
+      if(relic?.slot===id && loaded(relics)) {
+        ellipse(c,x+20,y-17,8,8,ink);
+        ellipse(c,x+20,y-17,7,7,'#fff1c5');
+        sprite(c,relics,relicIds.indexOf(relic.kind),x+20,y-9.5,14);
       }
     }
   }
@@ -236,9 +295,9 @@
     }
   }
 
-  function draw(c,s,aim) {
+  function draw(c,s,aim,time=s.time) {
     c.drawImage(land,0,0);
-    drawPlatformEnergy(c,s);
+    drawPlatformEnergy(c,s,time);
     drawSpirits(c,s);
     if(aim?.slot!=null) {
       const pos=slots[aim.slot];ellipse(c,pos.x,pos.y,aim.range,aim.range,'#f5ffde29');
@@ -249,28 +308,35 @@
       ellipse(c,f.x,f.y,f.radius,f.radius,colors[f.side]+'36');
       ring(c,f.x,f.y,f.radius,ink+'a0',3.5);
       for(let i=0;i<2;i++)ring(c,f.x,f.y,f.radius-i*8,colors[f.side]+'d0',i+1);
-      c.save();c.translate(f.x,f.y);c.rotate(reducedMotion.matches?0:s.time/2);
+      c.save();c.translate(f.x,f.y);c.rotate(reducedMotion.matches?0:time/2);
       const oct=Array.from({length:8},(_,i)=>[Math.cos(i*Math.PI/4)*f.radius*.79,Math.sin(i*Math.PI/4)*f.radius*.79]);
       path(c,[...oct,oct[0]]);c.stroke();c.restore();
     }
-    drawGuardians(c,s);
-    for(const e of s.enemies.slice().sort((a,b)=>a.y-b.y)) drawEnemy(c,e,s.time);
+    const towerActions=[], casts=[], leaks=[];
     for(const f of s.effects) {
-      const p=Math.max(0,Math.min(1,(s.time-f.at)/f.duration)), color=colors[f.side];
+      BattleFX.ground(c,f,time);
+      if(f.kind==='attack' || f.kind==='harvest') towerActions[f.slot]=f;
+      else if(f.kind==='cast') casts[f.side]=f;
+      else if(f.kind==='leak') leaks[f.side]=f;
+    }
+    drawTowers(c,s,towerActions,time);
+    drawGuardians(c,s,casts,leaks,time);
+    // Monsters and their status art always cover the towers, regardless of screen position.
+    for(const e of s.enemies.slice().sort((a,b)=>a.y-b.y)) drawEnemy(c,e,time);
+    for(const f of s.effects) {
+      if(f.kind==='field') continue;
+      const animated=f.kind==='attack'||f.kind==='harvest'||f.kind==='cast';
+      if(animated) BattleFX.front(c,f,time,reducedMotion.matches);
+      const p=BattleFX.phase(f,time), color=f.kind==='harvest'?'#eed1ff':colors[f.side];
       c.save();c.globalAlpha=1-p;
-      if(f.kind==='shot') {
-        const tint=Rules.towers[f.type].color, lx=f.x+(f.tx-f.x)*p, ly=f.y-10+(f.ty-f.y+10)*p;
-        path(c,[[lx,ly],[f.tx,f.ty]]);
-        c.strokeStyle=ink;c.lineWidth=4.5;c.stroke();
-        c.strokeStyle=tint;c.lineWidth=2.4;c.stroke();
-        ring(c,f.tx,f.ty,3+p*10,tint,1.4);
-      } else if(f.kind!=='field') {
-        if(f.kind!=='bounty') ring(c,f.x,f.y,(f.radius||29)*(.4+.65*p),f.type==='phoenix'?'#ffd084':color,2);
-        if(f.text) {
-          c.font='bold 15px "Microsoft YaHei",sans-serif';c.textAlign='center';
-          c.strokeStyle=ink;c.lineWidth=3;c.strokeText(f.text,f.x,f.y-14-p*17);
-          c.fillStyle=color;c.fillText(f.text,f.x,f.y-14-p*17);
-        }
+      if(!animated && f.kind!=='bounty') {
+        ring(c,f.x,f.y,(f.radius||29)*(.4+.65*p),f.type==='phoenix'?'#ffd084':color,2);
+      }
+      if(f.text) {
+        const rise=f.kind==='harvest'?49+p*38:14+p*17;
+        c.font='bold 15px "Microsoft YaHei",sans-serif';c.textAlign='center';
+        c.strokeStyle=ink;c.lineWidth=3;c.strokeText(f.text,f.x,f.y-rise);
+        c.fillStyle=color;c.fillText(f.text,f.x,f.y-rise);
       }
       c.restore();
     }
