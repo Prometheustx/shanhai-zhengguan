@@ -122,13 +122,13 @@
     for(const [type,count] of wave.groups) counts.set(type,(counts.get(type)||0)+count);
     const enemies=[...counts].map(([type,count])=>{
       const enemy=R.enemies[type];
-      return '<li class="wave-enemy">'+icon('enemy',type)+'<span><strong>'+enemy.name+' × '+count+'</strong>　'+enemy.desc+'</span></li>';
+      return '<li class="wave-enemy">'+icon('enemy',type)+'<span><strong>'+enemy.name+' × '+count+'</strong>　'+enemy.desc+' · 每只 '+enemy.reward+' 灵气</span></li>';
     }).join('');
     show('第 '+(index+1)+' 波 · '+wave.name,
-      '<p>妖物生命为原版同波的 '+wave.healthScale.toFixed(2)+' 倍。</p><ul>'+enemies+'</ul>');
+      '<p>本波生命强化倍率 '+wave.healthScale.toFixed(2)+' 倍。</p><ul>'+enemies+'</ul>');
   };
   $('help').onclick=()=>show('回龙谷 · 对战规则',
-    '<ol><li>妖潮从北面的魔界裂隙涌出，两次分流汇合，最后各自穿过南边的河谷关口。本地对局的右关由 NPC 操控。</li><li>商店单位免费取用，拖到空阵台召唤，或拖到同种一级塔上合成并夺取。刷新消耗灵气。</li><li>妖物脚下的箭头表示目标关口。击杀灵气归最后一击的塔主。受伤时显出裂纹，重伤时色泽变黯、动作变沉。</li><li>首波可点就绪提前开战，也会在 20 秒后自动开始。后续各波自动开始。点击波次标题可查看妖物阵容和生命倍率。</li></ol>');
+    '<ol><li>妖潮从北面的魔界裂隙涌出，两次分流汇合，最后各自穿过南边的河谷关口。本地对局的右关由 NPC 操控。</li><li>商店单位免费取用，拖到空阵台召唤，或拖到同种一级塔上合成并夺取。刷新消耗灵气。</li><li>妖物脚下的箭头表示目标关口。击杀灵气归最后一击的塔主。受伤时显出裂纹，重伤时色泽变黯、动作变沉。</li><li>首波可点就绪提前开战，也会在 20 秒后自动开始。后续各波自动开始。点击波次标题查看妖物阵容和击杀灵气。</li></ol>');
   function reset(){
     clearDrag();
     game=new Engine.Game(undefined,{npc:true});s=game.state;side=0;picked=null;from=null;targeting=null;lastUI='';lastSlots='';

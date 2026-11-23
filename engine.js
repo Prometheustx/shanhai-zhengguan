@@ -35,6 +35,7 @@
         towers:R.board.slots.map(()=>null),enemies:[],effects:[],result:null,preparationLeft:null,paused:false,speed:1};
       this.npc=!!options.npc;
       this.npcWait=0;
+      this.npcLastRefreshWave=-1;
       if(this.npc) {
         this.state.players[1].hero='houyi';
         this.state.players[1].heroConfirmed=true;
@@ -472,9 +473,9 @@
       }
       if(best) {
         this.command(1,best.action,true);
-      } else if((empty || rightPads.some(pos=>s.towers[pos.id]?.level===1)) &&
-                p.gold>=R.shop.refreshBase+p.refreshCount*R.shop.refreshStep) {
-        this.command(1,{kind:'refreshShop'},true);
+      } else if(s.phase==='prepare' && this.npcLastRefreshWave!==s.wave &&
+                (empty || rightPads.some(pos=>s.towers[pos.id]?.level===1))) {
+        if(this.command(1,{kind:'refreshShop'},true).ok) this.npcLastRefreshWave=s.wave;
       }
     }
     leak(e,damage) {

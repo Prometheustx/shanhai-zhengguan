@@ -26,21 +26,21 @@ for (const p of slots) {
   assert.deepEqual([slots[p.id^1].x,slots[p.id^1].y],[W-p.x,p.y]);
   assert.ok(p.y-22>R.board.demonBoundary,`${p.label}压到魔界边界`);
 }
-let previousHealthScale=0, previousEnemyHealth=0;
+assert.equal(R.waves.length,12);
+assert.deepEqual(Object.values(R.enemies).map(enemy=>enemy.reward),[1,2,3,6,10]);
+assert.equal(R.waveGold,9);
+let previousHealthScale=0;
 for(let i=0;i<R.waves.length;i++){
   const wave=R.waves[i];
   const g=new Game();g.state.wave=i;g.start();
-  let enemyHealth=0;
   for(const enemy of g.queue) {
     g.spawn(enemy);
     const {maxHp}=g.state.enemies.at(-1);
     assert.equal(maxHp,Math.round(Math.round(R.enemies[enemy.type].hp*wave.hp)*wave.healthScale));
-    enemyHealth+=maxHp;
   }
   assert.ok(i===0 ? wave.healthScale===2 : wave.healthScale>previousHealthScale);
-  assert.ok(enemyHealth>previousEnemyHealth);
   previousHealthScale=wave.healthScale;
-  previousEnemyHealth=enemyHealth;
+  assert.equal(g.queue.filter(e=>e.type==='taotie').length,i===R.waves.length-1?2:0);
   for(const type of Object.keys(R.enemies)){
     const tally=[0,0,0,0];
     for(const k of g.queue) if(k.type===type) tally[k.branch*2+k.gate]++;
@@ -89,7 +89,7 @@ const e=g.state.enemies[0];
 e.distance=65;Object.assign(e,at(e.branch,e.gate,e.distance));e.hp=1;
 g.tick(1/60);
 assert.equal(g.state.enemies.length,0);
-assert.deepEqual(g.state.players.map(p=>p.gold),[before[0]+6,before[1]]);
+assert.deepEqual(g.state.players.map(p=>p.gold),[before[0]+R.enemies.ghost.reward+R.relics.cauldron.bonus,before[1]]);
 assert.deepEqual(g.state.players.map(p=>p.kills),[1,0]);
 
 const relic=new Game();enter(relic);relic.state.wave=2;
@@ -123,17 +123,26 @@ assert.deepEqual(pass.state.players.map(p=>p.gold),[R.gold+R.waveGold,R.gold+R.w
 
 function mirroredMatch(openingSide){
   const g=new Game(openingSide), layout=[0,5,3,8,4,2,6,10,9,7,11,1];
+  const units=['bow','spear','bell','bow','hammer','seal'];
   enter(g);
   for(let wave=0;wave<R.waves.length;wave++){
     for (const side of [0,1]){
       for (const [i,n] of layout.entries()){
         const slot=n*2+side;
-        if (!g.state.towers[slot] && !place(g,side,slot,['bow','seal','bell','spear','hammer','cauldron'][i%6]).ok) break;
+        if (!g.state.towers[slot] && !place(g,side,slot,units[i%units.length]).ok) break;
       }
       if(wave>=2) {
         for(const n of layout) {
           const slot=n*2+side,t=g.state.towers[slot];
           if(t?.level===1) assert.ok(place(g,side,slot,t.type).ok);
+        }
+      }
+      if(wave===4) {
+        for(let i=0;i<units.length;i++){
+          const from=layout[i+units.length]*2+side,to=layout[i]*2+side;
+          const {type}=g.state.towers[from];
+          assert.ok(merge(g,side,from,to).ok);
+          assert.ok(place(g,side,from,type).ok);
         }
       }
       if(wave===2) {
@@ -144,7 +153,7 @@ function mirroredMatch(openingSide){
     }
     if(wave>0) for(let i=0;i<Math.ceil(R.waveBreak*60)+1 && g.state.phase==='prepare';i++) g.tick(1/60);
     for(let t=0;t<7000 && g.state.phase==='battle';t++) g.tick(1/60);
-    assert.equal(g.state.phase,wave===R.waves.length-1?'over':'prepare');
+    assert.equal(g.state.phase,wave===R.waves.length-1?'over':'prepare',R.waves[wave].name);
   }
   assert.equal(g.state.result.reason,'cleared');
   return g.state.players.map(p=>[p.hp,p.kills,p.bounty]);
@@ -179,6 +188,22 @@ for(let i=0;i<1200;i++) npc.tick(1/60);
 assert.equal(npc.state.phase,'battle');
 assert.ok(npc.state.towers.some(t=>t?.owner===1));
 assert.ok(npc.state.towers.every((t,i)=>t?.owner!==1 || slots[i].side===1));
+for(const openingSide of [0,1]) {
+  const idle=new Game(openingSide,{npc:true}), s=idle.state, rival=s.players[1];
+  // An uninterrupted supply of the longest-range attacker stresses the shared path coverage.
+  idle.rollShop=()=>Array(R.shop.size).fill('bow');
+  for(const p of s.players) p.shop=idle.rollShop();
+  assert.ok(idle.command(0,{kind:'confirmHero'}).ok);
+  for(let i=0;i<60*360 && s.phase!=='over';i++) {
+    const {phase}=s, refreshes=rival.refreshCount;
+    idle.tick(1/60);
+    if(phase==='battle') assert.equal(rival.refreshCount,refreshes);
+    assert.ok(rival.refreshCount<=s.wave+1);
+  }
+  assert.equal(s.result?.reason,'broken');
+  assert.ok(s.wave<=5,'NPC 独自通过的波数最多为四波');
+  assert.equal(s.players[0].kills,0);
+}
 const npcTactics=new Game(0,{npc:true});
 assert.ok(npcTactics.command(0,{kind:'confirmHero'}).ok);
 assert.ok(place(npcTactics,0,22,'hammer').ok);
@@ -317,4 +342,4 @@ assert.equal(urn.state.players[0].gold,R.gold+R.levels[2].qi);
 assert.equal(urn.state.players[0].bounty,0);
 assert.ok(urn.state.effects.some(f=>f.kind==='harvest' && f.side===0));
 assert.ok(urn.state.enemies.every(e=>e.hp===e.maxHp));
-console.log('通过：六件灵器、麻痹停步、灼烧归属、产气阶次、NPC 右侧布防、四路对称、合成、胜负及联机控制规则');
+console.log('通过：十二波与灵气、NPC 单独守关上限、四路对称、灵器机制、合成、胜负及联机控制');

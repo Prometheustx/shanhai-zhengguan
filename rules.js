@@ -17,7 +17,7 @@
     [p,mirror(p)].map(([x,y],side) => ({ id:i*2+side, x,y, side, label:(side ? '右' : '左') + (i+1) })));
   const config = {
     board:{W,H,upper,lower,paths,slots,gates:[lower.at(-1),mirror(lower.at(-1))],mirror,demonBoundary},
-    gold:20, waveGold:19, hp:12, maxLevel:3, relicWave:3, relicCost:34, defaultHero:'jingwei',
+    gold:20, waveGold:9, hp:12, maxLevel:3, relicWave:3, relicCost:34, defaultHero:'jingwei',
     firstPreparation:20, waveBreak:8, npcInterval:1.1,
     shop:{size:4,refreshBase:8,refreshStep:4},
     levels:[null,{damage:1,range:0,qi:2},{damage:1.72,range:10,qi:3},{damage:2.9,range:22,qi:5}],
@@ -50,7 +50,7 @@
       stone:{name:'女娲石',glyph:'石',gate:true,threshold:5,shield:3,desc:'关耐首次降到 5 或以下时先抵消最多 3 点伤害。'},
       bell:{name:'敦煌钟',glyph:'钟',every:3,shred:.23,duration:5,desc:'佩戴塔每第三击削弱目标护甲 5 秒。'},
       mirror:{name:'昆仑镜',glyph:'镜',range:26,desc:'使佩戴塔的射程增加 26。'},
-      cauldron:{name:'神农鼎·鼎纹',glyph:'鼎',bonus:2,desc:'佩戴塔每次尾刀额外获得 2 灵气。'},
+      cauldron:{name:'神农鼎·鼎纹',glyph:'鼎',bonus:1,desc:'佩戴塔每次尾刀额外获得 1 灵气。'},
       seal:{name:'崆峒印',glyph:'印',every:4,damage:1.65,desc:'佩戴塔每第四次攻击的伤害提高 65%。'}
     },
     spirits:{
@@ -66,11 +66,11 @@
       luwu:{name:'陆吾',glyph:'陆',heal:1,desc:'过波后修复己方镇关 1 点关耐。'}
     },
     enemies:{
-      ghost:{name:'游魂', glyph:'鬼', hp:62, speed:54, leak:1, reward:4, color:'#b3d4c9', radius:10, desc:'凡鬼 · 基础敌人'},
-      spirit:{name:'山魈', glyph:'精', hp:64, speed:82, leak:1, reward:5, color:'#e5c573', radius:10, desc:'山精 · 快速穿阵'},
-      demon:{name:'甲妖', glyph:'妖', hp:153, speed:49, leak:2, reward:8, color:'#ed9b74', radius:13, armor:.23, desc:'大妖 · 减免 23% 伤害'},
-      lord:{name:'蚀月妖将', glyph:'将', hp:450, speed:48, leak:3, reward:16, color:'#e889aa', radius:15, minSlow:.74, elite:true, desc:'精英 · 抗减速'},
-      taotie:{name:'饕餮',glyph:'餮',hp:980,speed:44,leak:5,reward:28,color:'#ffad73',radius:21,minSlow:.8,armor:.18,elite:true,
+      ghost:{name:'游魂', glyph:'鬼', hp:62, speed:54, leak:1, reward:1, color:'#b3d4c9', radius:10, desc:'凡鬼 · 基础敌人'},
+      spirit:{name:'山魈', glyph:'精', hp:64, speed:82, leak:1, reward:2, color:'#e5c573', radius:10, desc:'山精 · 快速穿阵'},
+      demon:{name:'甲妖', glyph:'妖', hp:153, speed:49, leak:2, reward:3, color:'#ed9b74', radius:13, armor:.23, desc:'大妖 · 减免 23% 伤害'},
+      lord:{name:'蚀月妖将', glyph:'将', hp:450, speed:48, leak:3, reward:6, color:'#e889aa', radius:15, minSlow:.74, elite:true, desc:'精英 · 抗减速'},
+      taotie:{name:'饕餮',glyph:'餮',hp:980,speed:44,leak:5,reward:10,color:'#ffad73',radius:21,minSlow:.8,armor:.18,elite:true,
         devour:{threshold:.45,charge:1.65,radius:110,max:2,heal:.14},desc:'凶兽 · 低血蓄力吞食同路小妖回血'}
     },
     waves:[
@@ -78,8 +78,14 @@
       {name:'山魈踏雾',groups:[['spirit',8],['ghost',4]], hp:1.12, healthScale:2.12, gap:.77},
       {name:'铁甲出山',groups:[['demon',8],['spirit',8]], hp:1.14, healthScale:2.24, gap:.68},
       {name:'百妖夜渡',groups:[['spirit',8],['demon',8],['ghost',4]], hp:1.38, healthScale:2.36, gap:.60},
-      {name:'妖将叩关',groups:[['demon',8],['spirit',8],['lord',4]], hp:1.45, healthScale:2.48, gap:.57},
-      {name:'饕餮破封',groups:[['demon',8],['spirit',8],['taotie',2],['demon',8]], hp:1.62, healthScale:2.60, gap:.55}
+      {name:'妖将叩关',groups:[['spirit',4],['demon',4],['lord',4],['demon',4],['spirit',4]], hp:1.48, healthScale:2.48, gap:.57},
+      {name:'群魈翻岭',groups:[['ghost',8],['spirit',12],['demon',8]], hp:1.48, healthScale:2.50, gap:.55},
+      {name:'铁阵压谷',groups:[['demon',12],['lord',4],['spirit',8]], hp:1.49, healthScale:2.52, gap:.60},
+      {name:'双涧伏妖',groups:[['spirit',8],['demon',16],['spirit',8]], hp:1.5, healthScale:2.54, gap:.48},
+      {name:'蚀月再临',groups:[['demon',8],['lord',4],['spirit',12],['demon',4]], hp:1.51, healthScale:2.56, gap:.55},
+      {name:'万妖穿峡',groups:[['spirit',12],['demon',12],['lord',4],['spirit',8]], hp:1.52, healthScale:2.58, gap:.50},
+      {name:'妖将列阵',groups:[['demon',12],['lord',4],['spirit',8],['lord',4]], hp:1.56, healthScale:2.60, gap:.57},
+      {name:'饕餮破封',groups:[['demon',8],['spirit',8],['lord',4],['taotie',2],['demon',12]], hp:1.62, healthScale:2.62, gap:.55}
     ]
   };
   if (typeof module === 'object') module.exports = config;
